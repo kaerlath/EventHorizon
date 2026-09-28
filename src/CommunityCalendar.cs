@@ -25,7 +25,7 @@ public sealed partial class MainWindow
             yield return communityEvents.FirstOrDefault(e => e.Id == item.Id && e.ReadOnly) ?? item;
         foreach (var item in communityEvents.Where(e => store.Events.All(local => local.Id != e.Id))) yield return item;
     }
-    private bool IsReadOnly(EventRecord item) => item.ReadOnly || communityEvents.Any(e => e.Id == item.Id && e.ReadOnly);
+    private bool IsReadOnly(EventRecord item) => item.Status is "Deleting" or "Deleted" || item.ReadOnly || communityEvents.Any(e => e.Id == item.Id && e.ReadOnly);
     private void DrawCommunityToolbar()
     {
         ImGui.BeginDisabled(!relay.Connected);

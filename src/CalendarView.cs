@@ -12,7 +12,7 @@ public sealed partial class MainWindow
     {
         var zone = TimeZoneInfo.Local;
         // Keep past published events available when browsing earlier months.
-        var events = EventLibrary().Where(e => e.Status != "Archived" && e.Status != "Draft" &&
+        var events = EventLibrary().Where(e => e.Status is not ("Archived" or "Deleting" or "Deleted") && e.Status != "Draft" &&
             (string.IsNullOrWhiteSpace(search) || (e.Title + " " + e.World + " " + e.Location).Contains(search, StringComparison.OrdinalIgnoreCase))).ToArray();
         if (ImGui.Button("<##previous", new Vector2(34, 30)))
             calendarSelection = calendarFocus = calendarWeekly ? calendarFocus.AddDays(-7) : calendarFocus.AddMonths(-1);

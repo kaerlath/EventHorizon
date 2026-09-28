@@ -15,6 +15,7 @@ public sealed class Plugin : IDalamudPlugin
     private readonly WindowSystem windows = new("EventHorizon");
     private readonly MainWindow main;
     private readonly ReminderWindow reminders;
+    private readonly EventConfirmationWindow confirmation;
     private DateTime nextBackgroundCheck;
 
     public Plugin(IDalamudPluginInterface pluginInterface, ICommandManager commands, IPluginLog log, ITextureProvider textures)
@@ -28,6 +29,8 @@ public sealed class Plugin : IDalamudPlugin
         windows.AddWindow(main);
         reminders = new ReminderWindow(store, main);
         windows.AddWindow(reminders);
+        confirmation = new EventConfirmationWindow(main);
+        windows.AddWindow(confirmation);
         commands.AddHandler(Command, new CommandInfo((_, _) => main.IsOpen = !main.IsOpen)
         {
             HelpMessage = "Open the Event Horizon event planner."
@@ -48,6 +51,7 @@ public sealed class Plugin : IDalamudPlugin
             main.ProcessBackgroundWork();
         }
         reminders.UpdateVisibility();
+        confirmation.UpdateVisibility();
         windows.Draw();
     }
 

@@ -1,3 +1,4 @@
+import {EventDeletion} from './deletion.js';
 import {DmReminders} from './dm-reminders.js';
 import {PersonalEvents} from './personal.js';
 import {communityEvents} from './community.js';
@@ -24,7 +25,7 @@ const input = async r => {
     if(size > 6 * 1024 * 1024) { await reader.cancel(); throw new RelayError('Request exceeds 6 MB.',413); } chunks.push(value); }
   try { return JSON.parse(await new Blob(chunks).text()); } catch { throw new RelayError('Invalid JSON.'); }
 };
-class DiscordRejected extends RelayError {}
+class DiscordRejected extends RelayError { constructor(message,status,discordStatus){super(message,status);this.discordStatus=discordStatus;} }
 
 // One Durable Object serializes the beta relay's state transitions. Intents are
 // committed before Discord creates, including across process/edge restarts.
@@ -32,7 +33,7 @@ export class RelayCore {
   constructor(storage, env, renderer, fetcher = (...args) => globalThis.fetch(...args)) {
     // Keep the Workers native fetch receiver; calling it as a RelayCore method
     // can throw Illegal invocation before an outbound request is even sent.
-    this.store = storage; this.env = env; this.render = renderer; this.fetcher = (...args) => fetcher(...args); this.google = new GoogleCalendar(this); this.subscriptions = new CalendarSubscriptions(this); this.personal = new PersonalEvents(this); this.dmReminders = new DmReminders(this);
+    this.store = storage; this.env = env; this.render = renderer; this.fetcher = (...args) => fetcher(...args); this.google = new GoogleCalendar(this); this.subscriptions = new CalendarSubscriptions(this); this.personal = new PersonalEvents(this); this.dmReminders = new DmReminders(this); this.deletion = new EventDeletion(this);
   }
   get configured() { return configured(this.env); }
   get origin() { return (this.env.PUBLIC_ORIGIN ?? '').replace(/\/$/,''); }
@@ -52,6 +53,7 @@ export class RelayCore {
         if(v.expires <= Date.now()) await this.store.delete(key); else remaining=true;
       }
     }
+    remaining = await this.deletion.process() || remaining;
     remaining = await this.google.processJobs() || remaining;
     remaining = await this.dmReminders.process() || remaining;
     if(remaining)await this.store.setAlarm(Date.now()+60000);
@@ -62,7 +64,7 @@ export class RelayCore {
   }
   async route(request) {
     const u = new URL(request.url), path = u.pathname, method = request.method;
-    if (path === '/health' && method === 'GET') return json({service:'Event Horizon', version:'0.13.0', configured:this.configured, composition:'browser-run',googleCalendar:googleConfigured(this.env),fontLibrary:true});
+    if (path === '/health' && method === 'GET') return json({service:'Event Horizon', version:'0.14.0', configured:this.configured, composition:'browser-run',googleCalendar:googleConfigured(this.env),fontLibrary:true});
     if (!this.configured) throw new RelayError('The relay needs its public origin and Discord application credentials.',503);
     if (u.origin !== this.origin) throw new RelayError('Use the configured relay address.',400);
     if(path === '/discord/install' && method === 'GET')return json({url:botInstallUrl(this.env.DISCORD_CLIENT_ID)});
@@ -131,6 +133,9 @@ export class RelayCore {
     const dm=/^\/events\/([a-f0-9-]{36})\/personal-reminders$/i.exec(path);
     if(dm && method==='GET')return json(await this.dmReminders.status(login.userId,dm[1].toLowerCase()));
     if(dm && method==='PUT')return json(await this.dmReminders.change(login,dm[1].toLowerCase(),await input(request)));
+    const deletion=/^\/events\/([a-f0-9-]{36})(\/deletion)?$/i.exec(path);
+    if(deletion && method==='DELETE' && !deletion[2])return json(await this.deletion.begin(login,deletion[1].toLowerCase()));
+    if(deletion && method==='GET' && deletion[2])return json(await this.deletion.status(login,deletion[1].toLowerCase()));
     const personal = /^\/google\/personal\/([a-f0-9-]{36})$/i.exec(path);
     if(personal && ['PUT','DELETE'].includes(method))return json(await this.personal.change(login,personal[1].toLowerCase(),method==='PUT'?await input(request):null,method==='DELETE'));
     if(path === '/google/status' && method === 'GET')return json(await this.google.status(login.userId));
@@ -139,7 +144,7 @@ export class RelayCore {
     if(path === '/google/disconnect' && method === 'POST')return json(await this.google.disconnect(login.userId));
     if(path === '/google/retry' && method === 'POST') {
       let count=await this.subscriptions.retry(login); count+=await this.personal.retry(login);
-      for(const [key,saved] of await this.store.list({prefix:'event:'}))if(saved.userId===login.userId && saved.record?.googleCalendarSync){
+      for(const [key,saved] of await this.store.list({prefix:'event:'}))if(!saved.deleting && saved.userId===login.userId && saved.record?.googleCalendarSync){
         await this.authorize(login,saved.guildId);await this.google.enqueue(key.slice(6),saved);count++;
       }
       return json({count});
@@ -153,7 +158,7 @@ export class RelayCore {
     if(channel && method === 'GET') return json(await this.channels(login,channel[1]));
     if(path === '/events' && method === 'GET') {
       const allowed = new Set((await this.guilds(login)).map(g=>g.id)), result=[];
-      for(const [,saved] of await this.store.list({prefix:'event:'})) if(saved.userId===login.userId && allowed.has(saved.guildId) && saved.eventId && saved.record)
+      for(const [,saved] of await this.store.list({prefix:'event:'})) if(!saved.deleting && saved.userId===login.userId && allowed.has(saved.guildId) && saved.eventId && saved.record)
         result.push({...saved.record,discordEventId:saved.eventId,discordMessageId:saved.messageId,relayOrigin:this.origin+'/',status:'Published'});
       return json(result);
     }
@@ -189,7 +194,7 @@ export class RelayCore {
     if(response.status>=300 && response.status<400)throw new Error('Unexpected Discord redirect');
     if(!response.ok) {
       if(response.status>=500) throw new Error('Discord response uncertain');
-      throw new DiscordRejected('Discord rejected the request. Check permissions and retry.',response.status===429?429:403);
+      throw new DiscordRejected('Discord rejected the request. Check permissions and retry.',response.status===429?429:403,response.status);
     }
     return response.status===204 ? {} : response.json();
   }
@@ -228,6 +233,7 @@ export class RelayCore {
     if(item.channelId && !(await this.channels(login,item.guildId)).some(c=>c.id===item.channelId))throw new RelayError('You and the bot need view, send, embed and attachment permissions.',403);
     const key='event:'+id; let saved=await this.store.get(key);
     if(saved && saved.userId!==login.userId)throw new RelayError('This event belongs to another account.',403);
+    if(saved?.deleting)throw new RelayError('This event was deleted or is being deleted. Create a new event instead.',409);
     if(saved && (saved.guildId!==item.guildId||saved.channelId!==item.channelId))throw new RelayError('Create a copy to change the destination.');
     saved??={userId:login.userId,guildId:item.guildId,channelId:item.channelId,eventId:'',messageId:'',bannerChunks:0};
     if(saved.eventPending)throw new RelayError('An earlier event create has an uncertain result. Operator reconciliation is required; no duplicate was sent.',409);

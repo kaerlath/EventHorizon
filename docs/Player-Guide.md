@@ -125,3 +125,18 @@ In a saved personal event's View, expand **Discord DM reminders (optional)**. Th
 - Editing an event with DMs enabled also updates its bot schedule when saved and requires a connection. Google sync remains a separate explicit action.
 
 Published/synced events keep their visibility. Use **Duplicate** to make a separate event with a different visibility. Personal events and popup preferences are stored in this plugin installation; they are not character-specific within the same installation. Signing out does not cancel opted-in remote reminders. No live test DM is sent automatically by an update.
+
+## Leave editing without getting stuck
+
+Choose **Cancel** or another sidebar page. A separate Event Horizon confirmation window offers **Discard changes** or **Keep editing**. Only the planner is disabled until you choose; the confirmation and other game windows stay interactive. Discard does not change the saved event.
+
+## Delete a published community event
+
+1. Connect the same Discord account that originally published the event, using its original relay. The organizer display name does not grant deletion rights.
+2. Open the event in **View** and choose **Delete published event...**. You can also open an old event from History.
+3. Read the confirmation, then choose **Delete everywhere**, or **Keep event** to cancel.
+4. The relay withdraws the event from community listings, deletes its Discord announcement and scheduled event, and queues deletion of Google copies managed by Event Horizon for the organizer and subscribers.
+5. Open the deletion record under **History** and choose **Check deletion status**. It reports outstanding Google copies. Use **Retry remaining cleanup** after resolving permissions or service failures.
+6. Subscribers whose Google access was disconnected or revoked must reconnect the original Google account and choose **Retry enabled event syncs** in Connection settings. The relay cannot delete independently exported/copied entries or entries in an account it no longer has permission to access.
+
+Deletion cannot be undone; duplicating the retained local record makes a new event. Ordinary **Archive locally** keeps remote copies and does not delete a Discord event. Partial deletion progress is retained and retries do not create new posts.

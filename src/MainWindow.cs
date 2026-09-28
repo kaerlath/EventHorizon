@@ -18,7 +18,7 @@ public sealed partial class MainWindow : Window, IDisposable
     private EventRecord editor = new();
     private Guid? selected;
     private string section = "Events", message = "", search = "", relayAddress;
-    private bool editing, preview, discardPrompt;
+    private bool editing, preview;
     private Action? afterDiscard;
     private LinkStart? link;
     private DiscordChoice[] guilds = [], channels = [];
@@ -80,7 +80,7 @@ public sealed partial class MainWindow : Window, IDisposable
         ProcessPendingOperation();
         ResetCommunitySession();
         DrawHeader();
-        ImGui.BeginDisabled(Busy);
+        ImGui.BeginDisabled(Busy || ConfirmationPending);
         ImGui.BeginChild("Navigation", new Vector2(220, -42), true);
         PanelBackdrop();
         ImGui.Spacing();
@@ -114,11 +114,11 @@ public sealed partial class MainWindow : Window, IDisposable
         else if (section == "Help") DrawHelp();
         else if (section == "About")
         {
-            DrawOrb(110); ImGui.TextColored(Accent, "EVENT HORIZON  /  0.12.0");
+            DrawOrb(110); ImGui.TextColored(Accent, "EVENT HORIZON  /  0.14.0");
             ImGui.TextUnformatted("Title font: " + titleFontName);
             ImGui.Checkbox("Animate gravity drive", ref animateOrb);
             ImGui.TextWrapped("A space-gothic event workspace for Eorzea. Plan locally, then publish native Discord events and rich announcements through your own relay.");
-            ImGui.TextWrapped("This release supports drafts, templates, history, browser account linking and Save & Sync. Custom role signups, reminders and recurrence scheduling are future work.");
+            ImGui.TextWrapped("Plan community or personal events, choose in-game reminders or optional Discord DMs, sync Google calendars, and delete your published events. Live role signups and automatic recurring publication are future work.");
         }
         else if (selected is Guid id && Find(id) is { } item)
         {
@@ -132,23 +132,14 @@ public sealed partial class MainWindow : Window, IDisposable
         else DrawList();
         ImGui.EndChild(); ImGui.EndDisabled();
         ImGui.TextWrapped(Busy ? "Working with the relay…" : message.Length > 0 ? message : "Drafts stay on this computer. Discord changes are sent only when you publish or sync.");
-        DrawDiscard();
         DrawRenderedPreview();
         DrawHelpOverlay();
     }
     private void Navigate(Action action)
     {
-        if (editing) { afterDiscard = action; discardPrompt = true; }
+        if (ConfirmationPending) return;
+        if (editing) { afterDiscard = action; }
         else { message = ""; action(); }
-    }
-    private void DrawDiscard()
-    {
-        if (discardPrompt) { ImGui.OpenPopup("Leave editor?"); discardPrompt = false; }
-        if (!ImGui.BeginPopupModal("Leave editor?", ImGuiWindowFlags.AlwaysAutoResize)) return;
-        ImGui.TextUnformatted("Leave this editor without saving your changes?");
-        if (ImGui.Button("Discard changes")) { editing = false; afterDiscard?.Invoke(); afterDiscard = null; ImGui.CloseCurrentPopup(); }
-        ImGui.SameLine(); if (ImGui.Button("Keep editing")) { afterDiscard = null; ImGui.CloseCurrentPopup(); }
-        ImGui.EndPopup();
     }
     private EventRecord NewRecord() => new()
     {
@@ -161,9 +152,9 @@ public sealed partial class MainWindow : Window, IDisposable
     private EventRecord[] Visible(string name) => (name == "Templates" ? store.Templates : EventLibrary().Where(e => name switch
     {
         "Drafts" => e.Status == "Draft",
-        "Recurring" => e.Recurrence != "None" && e.Status != "Archived",
-        "History" => e.Status == "Archived" || (e.Status != "Draft" && EventRules.HasEnded(e)),
-        _ => e.Status != "Archived" && e.Status != "Draft" && !EventRules.HasEnded(e)
+        "Recurring" => e.Recurrence != "None" && e.Status is not ("Archived" or "Deleting" or "Deleted"),
+        "History" => e.Status is "Archived" or "Deleting" or "Deleted" || (e.Status != "Draft" && EventRules.HasEnded(e)),
+        _ => e.Status is not ("Archived" or "Deleting" or "Deleted") && e.Status != "Draft" && !EventRules.HasEnded(e)
     })).Where(e => string.IsNullOrWhiteSpace(search) || (e.Title + " " + e.World + " " + e.Location).Contains(search, StringComparison.OrdinalIgnoreCase))
         .OrderByDescending(e => e.UpdatedUtc).ToArray();
     private void DrawList()
@@ -207,6 +198,7 @@ public sealed partial class MainWindow : Window, IDisposable
         ImGui.SameLine(); ImGui.BeginDisabled(IsReadOnly(item)); if (ActionButton("Edit event", FontAwesomeIcon.Edit, 155, true)) BeginEdit(item); ImGui.EndDisabled();
         ImGui.SameLine(); if (ActionButton("Duplicate", FontAwesomeIcon.Copy, 155)) CreateCopy(item);
         ImGui.Spacing(); Heading(item.Title);
+        if (item.Status is "Deleting" or "Deleted") { ImGui.TextWrapped("This event has been withdrawn. Check status below for remaining Discord or Google cleanup."); DrawDeletionControls(item); return; }
         DrawSchedule(item);
         if (item.DiscordEventId.Length > 0)
         {
@@ -265,6 +257,7 @@ public sealed partial class MainWindow : Window, IDisposable
             if (ImGui.Button("Open in Discord", new Vector2(-1, 36))) OpenUrl($"https://discord.com/events/{item.GuildId}/{item.DiscordEventId}");
             if (ImGui.Button("Copy event link", new Vector2(-1, 36))) { ImGui.SetClipboardText($"https://discord.com/events/{item.GuildId}/{item.DiscordEventId}"); message = "Event link copied."; }
         }
+        DrawDeletionControls(item);
         if (item.PersonalOnly && item.DiscordRemindersEnabled) ImGui.TextWrapped("Turn off Discord DM reminders below their heading before archiving.");
         if (!IsReadOnly(item) && item.Status != "Archived" && (!item.PersonalOnly || !item.DiscordRemindersEnabled) && ImGui.Button("Archive locally", new Vector2(-1, 36)))
         {

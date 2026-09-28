@@ -108,15 +108,16 @@ export class GoogleCalendar {
     }catch{}}
     await this.core.subscriptions.disconnect(userId);
     await this.store.delete(['google:'+userId,'google-link-user:'+userId]);
-    for(const [key,value] of await this.store.list({prefix:'google-job:'}))if(value.userId===userId)await this.store.delete(key);
+    for(const [key,value] of await this.store.list({prefix:'google-job:'}))if(value.userId===userId && value.action!=='remove')await this.store.delete(key);
     return {warning:c&&!revoked?'Disconnected locally. Google revocation was not confirmed; remove Event Horizon access in your Google account settings.':null};
   }
   async enqueue(id,saved){
     const key='google-job:'+id;
     if(await this.store.get(`google-sub:${id}:${saved.userId}`)){await this.store.delete(key);return null;}
-    if(!saved.record.googleCalendarSync){await this.store.delete(key);return null;}
+    if(saved.deleting||!saved.record.googleCalendarSync){await this.store.delete(key);return null;}
     const c=await this.store.get('google:'+saved.userId);
     if(!this.configured||!c?.calendarId)return 'Discord saved. Connect Google and prepare your calendar, then Save & Sync again.';
+    saved.googleCopy={subject:c.subject,calendarId:c.calendarId,eventId:id.replaceAll('-','')};await this.store.put('event:'+id,saved);
     await this.store.put(key,{userId:saved.userId,subject:c.subject,calendarId:c.calendarId,attempts:0,due:Date.now()});
     await this.store.setAlarm(Date.now()+60000);
     return 'Discord saved. Google Calendar sync is queued; check Google status shortly.';
@@ -137,7 +138,7 @@ export class GoogleCalendar {
           await this.core.subscriptions.process(job);await this.store.delete(key);continue;
         }
         const id=key.slice('google-job:'.length),saved=await this.store.get('event:'+id),c=await this.store.get('google:'+job.userId);
-        if(!saved?.record?.googleCalendarSync||saved.userId!==job.userId||!c||c.subject!==job.subject||c.calendarId!==job.calendarId){await this.store.delete(key);continue;}
+        if(saved?.deleting||!saved?.record?.googleCalendarSync||saved.userId!==job.userId||!c||c.subject!==job.subject||c.calendarId!==job.calendarId){await this.store.delete(key);continue;}
         this.requireConfigured();
         const item=saved.record,times=schedule(item,0),eventId=id.replaceAll('-','');
         const payload=this.eventPayload(saved);

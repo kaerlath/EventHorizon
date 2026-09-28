@@ -2,7 +2,7 @@
 
 A Final Fantasy XIV Dalamud plugin for planning community events and sharing them with Discord.
 
-Event Horizon combines an in-game calendar, local drafts, styled announcement images, personal reminders, and optional Google Calendar subscriptions. **Current plugin version: 0.13.0.** This is a friends-and-guild beta, not an official Dalamud plugin repository release.
+Event Horizon combines an in-game calendar, local drafts, styled announcement images, personal reminders, and optional Google Calendar subscriptions. **Current plugin version: 0.14.0.** This is a friends-and-guild beta, not an official Dalamud plugin repository release.
 
 ## Start here
 
@@ -25,7 +25,7 @@ Event Horizon combines an in-game calendar, local drafts, styled announcement im
 
 ## Test the plugin
 
-Once the v0.13.0 release package is published, install through Dalamud:
+Once the v0.14.0 release package is published, install through Dalamud:
 
 1. Open Dalamud Settings with `/xlsettings`, then the **Experimental** tab.
 2. Add this URL under **Custom Plugin Repositories**, enable it, and save:
@@ -69,7 +69,8 @@ Cloudflare deployment prepares the shared font assets automatically. Fonts rende
 ## Current limits
 
 - On-screen reminders require the game/plugin to remain running. They use saved schedules; refresh community events for organizer changes. Google subscriptions run separately through the relay.
-- Live role attendance, capacity enforcement, automated recurring publication and in-game Discord cancellation are not implemented. Signup/recurrence fields are planning information.
+- Live role attendance, capacity enforcement, automated recurring publication are not implemented. Signup/recurrence fields are planning information.
+- The publisher can delete a community event and its announcement, with queued removal of Event Horizon-managed Google copies. Disconnected Google accounts must reconnect for cleanup; independently copied/exported entries are outside relay control.
 - Archiving locally does not cancel a Discord event. Saving local changes does not publish them.
 - Discord sessions expire and require relinking. Organizer display names do not transfer editing rights.
 - The relay is designed for a small beta. Uncertain Discord creates may need operator reconciliation to prevent duplicates.

@@ -88,7 +88,7 @@ public sealed partial class MainWindow
             if (item is null) continue;
             try
             {
-                if (item.Status == "Archived") { ChangeReminder(s => s.Items.Remove(reminder)); continue; }
+                if (item.Status is "Archived" or "Deleting" or "Deleted") { ChangeReminder(s => s.Items.Remove(reminder)); continue; }
                 var updated = reminder.Copy(); updated.Refresh(item); updated.RelayOrigin = item.RelayOrigin;
                 if (updated.StartUtc != reminder.StartUtc || updated.EndUtc != reminder.EndUtc || updated.Title != reminder.Title || updated.Location != reminder.Location || updated.RelayOrigin != reminder.RelayOrigin)
                     store.ChangeReminders(s => { var index = s.Items.IndexOf(reminder); s.Items[index] = updated; });

@@ -2,7 +2,7 @@ import {RelayError,permissions} from './model.js';
 
 // Only information visible to the authenticated Discord member may leave a server.
 export async function requireViewer(core,userId,saved,cache=new Map()) {
-  if(!saved?.eventId||!saved.record)throw new RelayError('Event not found.',404);
+  if(saved?.deleting||!saved?.eventId||!saved.record)throw new RelayError('Event not found.',404);
   const guild=saved.guildId;
   async function get(path){
     if(!cache.has(path))cache.set(path,core.discord('GET',path));
@@ -21,7 +21,7 @@ export async function requireViewer(core,userId,saved,cache=new Map()) {
 export async function communityEvents(core,login){
   const guilds=new Set((await core.allGuilds(login.accessToken,false)).map(g=>g.id)),cache=new Map(),result=[];
   for(const [,saved] of await core.store.list({prefix:'event:'})){
-    if(!saved.eventId||!saved.record||!guilds.has(saved.guildId))continue;
+    if(saved.deleting||!saved.eventId||!saved.record||!guilds.has(saved.guildId))continue;
     try { await requireViewer(core,login.userId,saved,cache); }
     catch(e){if(e instanceof RelayError && [403,404].includes(e.status))continue;throw e;}
     result.push({...saved.record,googleCalendarSync:false,readOnly:saved.userId!==login.userId,

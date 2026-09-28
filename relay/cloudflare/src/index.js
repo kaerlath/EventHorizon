@@ -7,7 +7,7 @@ import icon from '../../../assets/icon.png';
 export default {
   async fetch(request,env) {
     const url=new URL(request.url);
-    if(url.pathname==='/health')return json({service:'Event Horizon',version:'0.13.0',configured:configured(env),composition:'browser-run',googleCalendar:googleConfigured(env),fontLibrary:true});
+    if(url.pathname==='/health')return json({service:'Event Horizon',version:'0.14.0',configured:configured(env),composition:'browser-run',googleCalendar:googleConfigured(env),fontLibrary:true});
     if(!/^\/(auth\/|google\/|discord\/|fonts$|preview$|events(?:\/|$))/.test(url.pathname))return json({error:'Unknown endpoint.'},404);
     if(Number(request.headers.get('Content-Length')??0)>6*1024*1024)return json({error:'Request exceeds 6 MB.'},413);
     return env.RELAY.get(env.RELAY.idFromName('event-horizon-beta-v1')).fetch(request);

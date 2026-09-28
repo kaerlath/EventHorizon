@@ -59,7 +59,11 @@ export class CalendarSubscriptions {
   }
   async process(job){
     const key=subscriptionKey(job.id,job.userId),sub=await this.store.get(key),c=await this.store.get('google:'+job.userId);
-    if(!sub||sub.eventId!==job.eventId||!c||c.subject!==job.subject||c.calendarId!==job.calendarId)return;
+    if(!sub||sub.eventId!==job.eventId)return;
+    if(!c||c.subject!==job.subject||c.calendarId!==job.calendarId){
+      if(job.action==='remove')throw new RelayError('Reconnect the original Google account to remove this copy.',409);
+      return;
+    }
     const google=this.core.google;
     const path='calendars/'+encodeURIComponent(c.calendarId)+'/events/'+sub.eventId;
     if(job.action==='remove'){
