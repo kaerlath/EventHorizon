@@ -24,9 +24,17 @@ Event Horizon combines an in-game calendar, local drafts, styled announcement im
 
 ## Test the plugin
 
-Use a release package when one is available, or build from source. Keep the DLL, manifest, icon, relay-defaults.json and fonts directory together. Add the EventHorizon.dll path in Dalamud's development-plugin settings, scan/load development plugins, then open `/eventhorizon`.
+Once the v0.12.0 release package is published, install through Dalamud:
 
-This GitHub repository URL is **not** a Dalamud custom plugin repository feed. Installation currently uses development plugins.
+1. Open Dalamud Settings with `/xlsettings`, then the **Experimental** tab.
+2. Add this URL under **Custom Plugin Repositories**, enable it, and save:
+   `https://raw.githubusercontent.com/kaerlath/EventHorizon/main/repo.json`
+3. Open `/xlplugins`, find **Event Horizon**, and install it.
+4. Open `/eventhorizon` and follow **Help & Walkthrough**.
+
+If you already use the development copy, disable that copy before enabling the installed version. Keep your existing plugin configuration.
+
+For development, keep the DLL, manifest, icon, relay-defaults.json and fonts directory together. Add the EventHorizon.dll path in Dalamud's development-plugin settings and scan/load development plugins. The GitHub project page itself is not the installer feed; use the raw repo.json URL above.
 
 The packaged shared service is `https://event-horizon-relay.kaerlath.workers.dev/`. This is public configuration, not a credential. Service availability and Google authorization eligibility depend on the operator's beta configuration.
 
