@@ -1,6 +1,8 @@
 {
   "Name": "Event Horizon",
   "Author": "Lynnaes Krasikaz",
+  "RepoUrl": "https://github.com/kaerlath/EventHorizon",
+  "IconUrl": "https://raw.githubusercontent.com/kaerlath/EventHorizon/main/assets/icon.png",
   "Punchline": "Plan FFXIV events from inside the game.",
   "Description": "Plan events with local drafts, templates, previews and history. Connect Discord through the shared Event Horizon relay to publish and synchronize scheduled events and composed announcements. Install the Event Horizon bot in your server before publishing."
 }
