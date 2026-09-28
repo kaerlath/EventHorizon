@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../relay/EventHorizon.Relay.csproj" /><Compile Include="../src/EventStore.cs" Link="EventStore.cs" /><Compile Include="../src/RelayDefaults.cs" Link="RelayDefaults.cs" /></ItemGroup>
+  <ItemGroup><Compile Include="../src/BannerPicker.cs" Link="BannerPicker.cs" /></ItemGroup>
+  <ItemGroup><Compile Include="../src/EventCalendar.cs" Link="EventCalendar.cs" /></ItemGroup>
+  <ItemGroup><Compile Include="../src/AppearanceSettings.cs" Link="AppearanceSettings.cs" /></ItemGroup>
+  <ItemGroup><Compile Include="../src/Reminders.cs" Link="Reminders.cs" /></ItemGroup>
+</Project>

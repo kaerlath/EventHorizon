@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup><TargetFramework>net10.0</TargetFramework><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings></PropertyGroup>
+  <ItemGroup><Compile Include="../src/EventRecord.cs" Link="EventRecord.cs" /><Compile Include="../src/EventRules.cs" Link="EventRules.cs" /><Compile Include="../src/BannerUpload.cs" Link="BannerUpload.cs" /></ItemGroup>
+  <ItemGroup>
+    <Content Include="../assets/fonts/Cinzel.ttf" Link="card-assets/Cinzel.ttf" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../assets/fonts/OFL.txt" Link="card-assets/OFL.txt" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../assets/icon.png" Link="card-assets/icon.png" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup><Compile Include="../src/AnnouncementStyle.cs" Link="AnnouncementStyle.cs" /></ItemGroup>
+</Project>

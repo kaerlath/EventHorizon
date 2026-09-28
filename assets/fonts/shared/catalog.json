@@ -1,0 +1,291 @@
+[
+  {
+    "name": "Orbitron",
+    "category": "Futuristic",
+    "faces": [
+      {
+        "file": "orbitron-0.ttf",
+        "style": "normal",
+        "weight": "400 900"
+      }
+    ],
+    "license": "orbitron-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/orbitron/"
+  },
+  {
+    "name": "Rajdhani",
+    "category": "Futuristic",
+    "faces": [
+      {
+        "file": "rajdhani-0.ttf",
+        "style": "normal",
+        "weight": "400"
+      },
+      {
+        "file": "rajdhani-1.ttf",
+        "style": "normal",
+        "weight": "700"
+      }
+    ],
+    "license": "rajdhani-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/rajdhani/"
+  },
+  {
+    "name": "Exo 2",
+    "category": "Futuristic",
+    "faces": [
+      {
+        "file": "exo2-0.ttf",
+        "style": "normal",
+        "weight": "100 900"
+      },
+      {
+        "file": "exo2-1.ttf",
+        "style": "italic",
+        "weight": "100 900"
+      }
+    ],
+    "license": "exo2-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/exo2/"
+  },
+  {
+    "name": "Chakra Petch",
+    "category": "Futuristic",
+    "faces": [
+      {
+        "file": "chakrapetch-0.ttf",
+        "style": "normal",
+        "weight": "400"
+      },
+      {
+        "file": "chakrapetch-1.ttf",
+        "style": "italic",
+        "weight": "400"
+      },
+      {
+        "file": "chakrapetch-2.ttf",
+        "style": "normal",
+        "weight": "700"
+      },
+      {
+        "file": "chakrapetch-3.ttf",
+        "style": "italic",
+        "weight": "700"
+      }
+    ],
+    "license": "chakrapetch-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/chakrapetch/"
+  },
+  {
+    "name": "Oxanium",
+    "category": "Futuristic",
+    "faces": [
+      {
+        "file": "oxanium-0.ttf",
+        "style": "normal",
+        "weight": "200 800"
+      }
+    ],
+    "license": "oxanium-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/oxanium/"
+  },
+  {
+    "name": "Space Grotesk",
+    "category": "Modern",
+    "faces": [
+      {
+        "file": "spacegrotesk-0.ttf",
+        "style": "normal",
+        "weight": "300 700"
+      }
+    ],
+    "license": "spacegrotesk-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/spacegrotesk/"
+  },
+  {
+    "name": "Inter",
+    "category": "Readable",
+    "faces": [
+      {
+        "file": "inter-0.ttf",
+        "style": "normal",
+        "weight": "100 900"
+      },
+      {
+        "file": "inter-1.ttf",
+        "style": "italic",
+        "weight": "100 900"
+      }
+    ],
+    "license": "inter-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/inter/"
+  },
+  {
+    "name": "Nunito Sans",
+    "category": "Readable",
+    "faces": [
+      {
+        "file": "nunitosans-0.ttf",
+        "style": "normal",
+        "weight": "200 1000"
+      },
+      {
+        "file": "nunitosans-1.ttf",
+        "style": "italic",
+        "weight": "200 1000"
+      }
+    ],
+    "license": "nunitosans-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/nunitosans/"
+  },
+  {
+    "name": "Lora",
+    "category": "Literary",
+    "faces": [
+      {
+        "file": "lora-0.ttf",
+        "style": "normal",
+        "weight": "400 700"
+      },
+      {
+        "file": "lora-1.ttf",
+        "style": "italic",
+        "weight": "400 700"
+      }
+    ],
+    "license": "lora-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/lora/"
+  },
+  {
+    "name": "Cormorant Garamond",
+    "category": "Fantasy",
+    "faces": [
+      {
+        "file": "cormorantgaramond-0.ttf",
+        "style": "normal",
+        "weight": "300 700"
+      },
+      {
+        "file": "cormorantgaramond-1.ttf",
+        "style": "italic",
+        "weight": "300 700"
+      }
+    ],
+    "license": "cormorantgaramond-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/cormorantgaramond/"
+  },
+  {
+    "name": "Playfair Display",
+    "category": "Elegant",
+    "faces": [
+      {
+        "file": "playfairdisplay-0.ttf",
+        "style": "normal",
+        "weight": "400 900"
+      },
+      {
+        "file": "playfairdisplay-1.ttf",
+        "style": "italic",
+        "weight": "400 900"
+      }
+    ],
+    "license": "playfairdisplay-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/playfairdisplay/"
+  },
+  {
+    "name": "Uncial Antiqua",
+    "category": "Fantasy",
+    "faces": [
+      {
+        "file": "uncialantiqua-0.ttf",
+        "style": "normal",
+        "weight": "400"
+      }
+    ],
+    "license": "uncialantiqua-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/uncialantiqua/"
+  },
+  {
+    "name": "Grenze Gotisch",
+    "category": "Gothic",
+    "faces": [
+      {
+        "file": "grenzegotisch-0.ttf",
+        "style": "normal",
+        "weight": "100 900"
+      }
+    ],
+    "license": "grenzegotisch-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/grenzegotisch/"
+  },
+  {
+    "name": "Great Vibes",
+    "category": "Script",
+    "faces": [
+      {
+        "file": "greatvibes-0.ttf",
+        "style": "normal",
+        "weight": "400"
+      }
+    ],
+    "license": "greatvibes-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/greatvibes/"
+  },
+  {
+    "name": "Dancing Script",
+    "category": "Script",
+    "faces": [
+      {
+        "file": "dancingscript-0.ttf",
+        "style": "normal",
+        "weight": "400 700"
+      }
+    ],
+    "license": "dancingscript-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/dancingscript/"
+  },
+  {
+    "name": "Caveat",
+    "category": "Handwritten",
+    "faces": [
+      {
+        "file": "caveat-0.ttf",
+        "style": "normal",
+        "weight": "400 700"
+      }
+    ],
+    "license": "caveat-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/caveat/"
+  },
+  {
+    "name": "JetBrains Mono",
+    "category": "Monospace",
+    "faces": [
+      {
+        "file": "jetbrainsmono-0.ttf",
+        "style": "normal",
+        "weight": "100 800"
+      },
+      {
+        "file": "jetbrainsmono-1.ttf",
+        "style": "italic",
+        "weight": "100 800"
+      }
+    ],
+    "license": "jetbrainsmono-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/jetbrainsmono/"
+  },
+  {
+    "name": "Special Elite",
+    "category": "Typewriter",
+    "faces": [
+      {
+        "file": "specialelite-0.ttf",
+        "style": "normal",
+        "weight": "400"
+      }
+    ],
+    "license": "specialelite-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/apache/specialelite/"
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "name": "event-horizon-cloudflare-relay",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node --test tests/*.test.js", "deploy": "wrangler deploy", "check": "wrangler deploy --dry-run" },
+  "version": "0.1.0",
+  "description": "Cloudflare deployment tooling for the Event Horizon relay port",
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
