@@ -1,3 +1,4 @@
+import {session,heartbeat} from './session.js';
 import {announcementText} from './announcement.js';
 import {EventDeletion} from './deletion.js';
 import {DmReminders} from './dm-reminders.js';
@@ -65,7 +66,7 @@ export class RelayCore {
   }
   async route(request) {
     const u = new URL(request.url), path = u.pathname, method = request.method;
-    if (path === '/health' && method === 'GET') return json({service:'Event Horizon', version:'0.14.1', configured:this.configured, composition:'browser-run',googleCalendar:googleConfigured(this.env),fontLibrary:true});
+    if (path === '/health' && method === 'GET') return json({service:'Event Horizon', version:'0.15.0', configured:this.configured, composition:'browser-run',googleCalendar:googleConfigured(this.env),fontLibrary:true});
     if (!this.configured) throw new RelayError('The relay needs its public origin and Discord application credentials.',503);
     if (u.origin !== this.origin) throw new RelayError('Use the configured relay address.',400);
     if(path === '/discord/install' && method === 'GET')return json({url:botInstallUrl(this.env.DISCORD_CLIENT_ID)});
@@ -106,7 +107,7 @@ export class RelayCore {
       stage='Discord account lookup';
       const user = await this.discord('GET','users/@me',undefined,data.access_token,false);
       if(typeof user.id!=='string'||typeof user.username!=='string')throw new Error('Invalid account response');
-      link.login={userId:user.id,name:user.username,accessToken:data.access_token,expires:Date.now()+Math.min(3600,data.expires_in)*1000};
+      link.login={userId:user.id,name:user.username,accessToken:data.access_token,refreshToken:typeof data.refresh_token==='string'?data.refresh_token:undefined,accessExpires:Date.now()+data.expires_in*1000,expires:Date.now()+Math.min(3600,data.expires_in)*1000};
       stage='saving the connection';
       await this.store.put('link:'+pollToken,link);
       return new Response('Discord linked. Return to Event Horizon and click Finish connection.',{headers:{'Cache-Control':'no-store','Referrer-Policy':'no-referrer'}});
@@ -125,7 +126,9 @@ export class RelayCore {
       return json({status:'connected',token:sessionToken,userName:link.login.name});
     }
     if(path === '/auth/logout' && method === 'POST') { await this.store.delete('session:'+bearer(request)); return json({ok:true}); }
-    const login = await this.live('session:'+bearer(request));
+    const sessionKey = 'session:'+bearer(request);
+    const login = await session(this,sessionKey);
+    if(path === '/auth/heartbeat' && method === 'POST')return json(await heartbeat(this,sessionKey,login,(await input(request)).enabled));
     const art=/^\/events\/([a-f0-9-]{36})\/image$/i.exec(path);
     if(art && method==='GET')return json(await eventArt(this,login,art[1].toLowerCase()));
     if(path === '/fonts' && method === 'POST')return json(await importFont(this.store,login.userId,await input(request)));

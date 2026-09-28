@@ -423,13 +423,14 @@ public sealed partial class MainWindow : Window, IDisposable
         if (!relay.Connected)
         {
             ImGui.TextColored(Accent, "1. LINK YOUR DISCORD ACCOUNT");
-            ImGui.BeginDisabled(relay.Origin.Length == 0);
+            ImGui.BeginDisabled(relay.Origin.Length == 0 || !gameLoggedIn);
             if (ImGui.Button("Connect Discord account", new Vector2(240, 38))) Run(async () =>
             {
+                var generation = connectionGeneration;
                 var result = await relay.Send<LinkStart>(HttpMethod.Post, "auth/link", authenticated: false);
                 if (!Uri.TryCreate(result.VerificationUrl, UriKind.Absolute, out var uri) || uri.GetLeftPart(UriPartial.Authority) + "/" != relay.Origin)
                     throw new InvalidOperationException("The relay returned an unexpected authorization address.");
-                return () => { link = result; message = "Click Open authorization page, approve in Discord, then Finish connection."; };
+                return () => { if (generation != connectionGeneration) return; link = result; message = "Click Open authorization page, approve in Discord, then Finish connection."; };
             });
             ImGui.EndDisabled();
             if (link is { } pending)
@@ -438,9 +439,12 @@ public sealed partial class MainWindow : Window, IDisposable
                 if (ImGui.Button("Open authorization page")) OpenUrl(pending.VerificationUrl);
                 ImGui.SameLine(); if (ImGui.Button("Finish connection")) Run(async () =>
                 {
+                    var generation = connectionGeneration;
+                    var origin = relay.Origin;
                     var result = await relay.Send<LinkResult>(HttpMethod.Post, "auth/poll", new { pending.PollToken }, false);
                     return () =>
                     {
+                        if (generation != connectionGeneration || !gameLoggedIn) { if (result.Token is { Length: > 0 }) _ = RevokeSession(origin, result.Token); return; }
                         if (result.Status == "connected" && !string.IsNullOrEmpty(result.Token))
                         { relay.Token = result.Token; relay.UserName = result.UserName ?? "Discord account"; link = null; message = "Connected. Load your servers below."; }
                         else message = "Waiting for Discord authorization. Complete it in your browser first.";
@@ -487,7 +491,7 @@ public sealed partial class MainWindow : Window, IDisposable
                 ImGui.EndCombo();
             }
         }
-        ImGui.Spacing(); ImGui.TextWrapped("Connections last up to one hour. Reloading the plugin requires linking again. Your local drafts and saved destination remain available.");
+        ImGui.Spacing(); DrawPlaySessionSettings();
     }
     private void LoadChannels(string guild) => Run(async () =>
     { var result = await relay.Send<DiscordChoice[]>(HttpMethod.Get, $"discord/guilds/{guild}/channels"); return () => { channels = result; message = "Channels refreshed."; }; });

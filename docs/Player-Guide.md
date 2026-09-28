@@ -1,6 +1,6 @@
 # Event Horizon — Player Guide
 
-Version 0.12.0. Open the addon with `/eventhorizon`. This guide is also available in-game under **Help & Walkthrough**.
+Version 0.15.0. Open the addon with `/eventhorizon`. This guide is also available in-game under **Help & Walkthrough**.
 
 ## 1. Welcome to Event Horizon
 
@@ -23,6 +23,8 @@ Use your own Discord account. The server also needs the Event Horizon bot. Ordin
 4. In your browser, choose Continue to Discord and authorize your account. Return to the plugin and click Finish connection.
 5. Click Load servers. Choose your Server, then Refresh channels if needed and choose an Announcement channel.
 6. Check that the sidebar says Connected and shows your intended community. The announcement channel receives the composed image; the native Discord event is created in the server.
+
+**Stay connected while playing** is enabled by default in Connection settings. It renews your connection while logged into FFXIV, including when Event Horizon is closed or the game's UI is hidden. Log out or unload the plugin to disconnect; connect again next play session. If the game crashes or loses contact, the relay expires your session after 15 minutes without a check-in. Turning the option off restores a connection of up to one hour. A revoked Discord authorization still requires reconnecting. Offline Discord reminders and Google Calendar updates continue separately.
 
 **Remember:** Only eligible servers/channels appear for publishing. Ask an administrator about bot installation and event/channel permissions if your destination is missing. Linking uses your browser; never enter passwords or bot tokens in Event Horizon.
 

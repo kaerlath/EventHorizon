@@ -25,6 +25,7 @@ public sealed class EventStore
             HelpStep = data?.HelpStep ?? 0;
             RelayUrl = data?.RelayUrl ?? "";
             RelayAddressLocked = data?.RelayAddressLocked ?? true;
+            StayConnectedWhilePlaying = data?.StayConnectedWhilePlaying ?? true;
             GuildId = data?.GuildId ?? "";
             GuildName = data?.GuildName ?? "";
             ChannelId = data?.ChannelId ?? "";
@@ -50,6 +51,7 @@ public sealed class EventStore
     public string? LoadError { get; }
     public string RelayUrl { get; set; } = "";
     public bool RelayAddressLocked { get; set; } = true;
+    public bool StayConnectedWhilePlaying { get; set; } = true;
     public string GuildId { get; set; } = "";
     public string GuildName { get; set; } = "";
     public string ChannelId { get; set; } = "";
@@ -67,10 +69,10 @@ public sealed class EventStore
     {
         if (LoadError is not null) throw new InvalidOperationException("Existing event data could not be read: " + LoadError);
         var temp = path + ".tmp";
-        File.WriteAllText(temp, JsonSerializer.Serialize(new StoreData(Events, Templates, RelayUrl, GuildId, GuildName, ChannelId, ChannelName, RelayAddressLocked, Appearance, Reminders, ShowWelcomeHelp, HelpStep), options));
+        File.WriteAllText(temp, JsonSerializer.Serialize(new StoreData(Events, Templates, RelayUrl, GuildId, GuildName, ChannelId, ChannelName, RelayAddressLocked, Appearance, Reminders, ShowWelcomeHelp, HelpStep, StayConnectedWhilePlaying), options));
         File.Move(temp, path, true);
     }
 
     private sealed record StoreData(List<EventRecord> Events, List<EventRecord> Templates, string RelayUrl,
-        string GuildId = "", string GuildName = "", string ChannelId = "", string ChannelName = "", bool RelayAddressLocked = true, AppearanceSettings? Appearance = null, ReminderSettings? Reminders = null, bool ShowWelcomeHelp = true, int HelpStep = 0);
+        string GuildId = "", string GuildName = "", string ChannelId = "", string ChannelName = "", bool RelayAddressLocked = true, AppearanceSettings? Appearance = null, ReminderSettings? Reminders = null, bool ShowWelcomeHelp = true, int HelpStep = 0, bool StayConnectedWhilePlaying = true);
 }

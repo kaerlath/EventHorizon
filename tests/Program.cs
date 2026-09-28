@@ -174,6 +174,10 @@ var native = System.Runtime.InteropServices.Marshal.AllocHGlobal(System.Runtime.
 try { System.Runtime.InteropServices.Marshal.StructureToPtr(Activator.CreateInstance(pickerType)!, native, false); Check(true, "Windows picker structure marshals successfully"); }
 finally { System.Runtime.InteropServices.Marshal.DestroyStructure(native, pickerType); System.Runtime.InteropServices.Marshal.FreeHGlobal(native); }
 var lockStore = new EventStore(Path.Combine(root, "locking"));
+Check(lockStore.StayConnectedWhilePlaying, "play-session renewal enabled by default");
+lockStore.StayConnectedWhilePlaying = false;
+lockStore.Save();
+Check(!new EventStore(Path.Combine(root, "locking")).StayConnectedWhilePlaying, "play-session opt-out survives reload");
 Check(lockStore.RelayAddressLocked, "relay address locked by default");
 lockStore.RelayAddressLocked = false; lockStore.Save();
 Check(!new EventStore(Path.Combine(root, "locking")).RelayAddressLocked, "custom relay unlock persists");
