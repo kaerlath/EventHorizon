@@ -29,6 +29,8 @@ public sealed partial class MainWindow
         new("Create and save your first event",
             "Your event begins as a local draft. You can save it, come back later, and adjust it before sharing.",
             ["Click + Create Event and enter a short, clear Title and Description. Include what guests need to know or bring.",
+             "For a private reminder, choose Visibility: Personal — only me. Save personal event puts it in Events without posting to Discord. Save & sync my Google Calendar also queues a private Google copy after you connect your accounts. In View, enable Remind me on screen under Personal Reminder and enable reminder popups. Google calendar sharing still applies.",
+             "Optional: in a saved personal event, expand Discord DM reminders. Choose advance and near-start times, then check Send me Discord reminders. Send test reminder to me checks delivery. Uncheck to cancel unsent DMs before archiving. These run while the game is closed; allow bot DMs. Google sync and in-game popups stay separate.",
              "Choose the date using the calendar, then select the hour, minute and AM/PM. Check Time zone and Duration carefully.",
              "Enter World and Location so players can find the event. Organizer can be an in-game or display name.",
              "Check Discord destination. If needed, choose your destination in Connection settings and then click Use destination from Settings in the editor.",

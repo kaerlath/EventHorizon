@@ -10,6 +10,16 @@ void Check(bool condition, string name) { if (!condition) throw new Exception(na
 async Task Reject(Func<Task> action, string name) { try { await action(); } catch { Check(true, name); return; } throw new Exception(name); }
 EventRecord Make() => new() { Title = "Moonlit gathering", Description = "A community evening", StartLocal = DateTime.UtcNow.AddDays(2).ToString("yyyy-MM-dd HH:mm"), TimeZoneId = "UTC", Location = "Lavender Beds", World = "Balmung", GuildId = "123", ChannelId = "456" };
 var sample = Make();
+var privateEvent = Make(); privateEvent.PersonalOnly = true; privateEvent.GuildId = ""; privateEvent.ChannelId = ""; privateEvent.Location = ""; privateEvent.Status = "Personal";
+Check(EventRules.Validate(privateEvent) is null, "personal event needs no Discord destination or location");
+Check(EventRules.Validate(privateEvent, true) is not null, "personal event cannot publish to Discord");
+var privateStore = new EventStore(Path.Combine(root, "private")); privateStore.Upsert(privateEvent);
+var privateReload = new EventStore(Path.Combine(root, "private")).Events.Single();
+Check(privateReload.PersonalOnly && privateReload.Status == "Personal", "personal visibility survives local saving");
+Check(EventCalendar.OnDay(new[] { privateReload }, EventRules.Start(privateReload).UtcDateTime.Date, TimeZoneInfo.Utc).Length == 1, "personal event appears on its calendar day");
+var privateReminder = new EventReminder { EventId = privateReload.Id, MinutesBefore = 15 }; privateReminder.Refresh(privateReload);
+Check(ReminderClock.Due(new ReminderSettings { Enabled = true, Items = new() { privateReminder } }, EventRules.Start(privateReload).AddMinutes(-10)).Length == 1, "personal event supports countdown reminders");
+
 var reminderNow = new DateTimeOffset(2035, 6, 12, 17, 45, 0, TimeSpan.Zero);
 var reminderEvent = Make(); reminderEvent.StartLocal = "2035-06-12 18:00";
 var personalReminder = new EventReminder { EventId = reminderEvent.Id, MinutesBefore = 15 };

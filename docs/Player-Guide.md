@@ -101,3 +101,27 @@ Most setup issues can be resolved without recreating your event.
 
 **Remember:** Help & Walkthrough is always available from the sidebar. You can repeat any step without enabling reminders, authorizing accounts, or posting automatically.
 
+
+## Personal events — only me
+
+1. Choose **+ Create Event**, then **Visibility → Personal — only me**.
+2. Enter your title, date, time, time zone and duration. Location is optional.
+3. Choose **Save personal event**. It appears in your Events calendar and is never published to Discord or listed for other players.
+4. Open **View → Personal Reminder**, check **Remind me on screen**, choose the lead time, and enable reminder popups if prompted. The game and plugin must be running for these popups.
+5. For an optional Google copy, connect your account and Google Calendar in Connection settings. Use **Save & sync my Google Calendar** in the editor, or **My Google Calendar → Add / update my Google copy** in View. Details pass through the relay to your connected Google account. Google calendar sharing settings still apply.
+6. After editing, use **Save & sync my Google Calendar** to update Google. Ordinary saving does not update Google. Check Google status in Connection settings for pending or failed work; **Retry enabled event syncs** retries private copies too.
+7. **Remove my Google copy** removes the remote copy and keeps your local event. Archiving locally stops local reminders but keeps the Google copy. Remove the Google copy before archiving if desired.
+
+### Optional Discord direct messages
+
+In a saved personal event's View, expand **Discord DM reminders (optional)**. This starts off.
+
+- Choose advance and near-start times, then check **Send me Discord reminders**. The recipient is your linked Discord account, never a server channel.
+- To change times while enabled, choose **Apply DM reminder times**. Match the near-start time to your on-screen reminder if you want them together; they are independent settings. Equal times produce only one DM.
+- **Send test reminder to me** sends a real test DM to your linked account. You may need to allow DMs and share a Discord server with the bot.
+- The relay checks approximately once a minute and continues while you are out of game or your plugin login expires. Times already passed when scheduled are skipped. Outages can delay or prevent delivery; reminders more than ten minutes late are skipped.
+- **Refresh DM delivery status** shows scheduled, sent, missed or failed/unconfirmed delivery. Uncertain sends are not automatically repeated, to avoid duplicate messages.
+- Uncheck **Send me Discord reminders** to cancel unsent DMs. You must be connected to the same account and relay. Turn these off before archiving.
+- Editing an event with DMs enabled also updates its bot schedule when saved and requires a connection. Google sync remains a separate explicit action.
+
+Published/synced events keep their visibility. Use **Duplicate** to make a separate event with a different visibility. Personal events and popup preferences are stored in this plugin installation; they are not character-specific within the same installation. Signing out does not cancel opted-in remote reminders. No live test DM is sent automatically by an update.

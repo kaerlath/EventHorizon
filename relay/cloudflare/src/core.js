@@ -1,3 +1,5 @@
+import {DmReminders} from './dm-reminders.js';
+import {PersonalEvents} from './personal.js';
 import {communityEvents} from './community.js';
 import {eventArt,saveEventArt} from './event-art.js';
 import {botInstallUrl} from './bot-install.js';
@@ -30,7 +32,7 @@ export class RelayCore {
   constructor(storage, env, renderer, fetcher = (...args) => globalThis.fetch(...args)) {
     // Keep the Workers native fetch receiver; calling it as a RelayCore method
     // can throw Illegal invocation before an outbound request is even sent.
-    this.store = storage; this.env = env; this.render = renderer; this.fetcher = (...args) => fetcher(...args); this.google = new GoogleCalendar(this); this.subscriptions = new CalendarSubscriptions(this);
+    this.store = storage; this.env = env; this.render = renderer; this.fetcher = (...args) => fetcher(...args); this.google = new GoogleCalendar(this); this.subscriptions = new CalendarSubscriptions(this); this.personal = new PersonalEvents(this); this.dmReminders = new DmReminders(this);
   }
   get configured() { return configured(this.env); }
   get origin() { return (this.env.PUBLIC_ORIGIN ?? '').replace(/\/$/,''); }
@@ -51,6 +53,7 @@ export class RelayCore {
       }
     }
     remaining = await this.google.processJobs() || remaining;
+    remaining = await this.dmReminders.process() || remaining;
     if(remaining)await this.store.setAlarm(Date.now()+60000);
   }
   async handle(request) {
@@ -59,7 +62,7 @@ export class RelayCore {
   }
   async route(request) {
     const u = new URL(request.url), path = u.pathname, method = request.method;
-    if (path === '/health' && method === 'GET') return json({service:'Event Horizon', version:'0.12.0', configured:this.configured, composition:'browser-run',googleCalendar:googleConfigured(this.env),fontLibrary:true});
+    if (path === '/health' && method === 'GET') return json({service:'Event Horizon', version:'0.13.0', configured:this.configured, composition:'browser-run',googleCalendar:googleConfigured(this.env),fontLibrary:true});
     if (!this.configured) throw new RelayError('The relay needs its public origin and Discord application credentials.',503);
     if (u.origin !== this.origin) throw new RelayError('Use the configured relay address.',400);
     if(path === '/discord/install' && method === 'GET')return json({url:botInstallUrl(this.env.DISCORD_CLIENT_ID)});
@@ -124,12 +127,18 @@ export class RelayCore {
     if(art && method==='GET')return json(await eventArt(this,login,art[1].toLowerCase()));
     if(path === '/fonts' && method === 'POST')return json(await importFont(this.store,login.userId,await input(request)));
     if(path === '/fonts' && method === 'GET')return json([...await this.store.list({prefix:'font-user:'+login.userId+':'})].map(([,v])=>v));
+    if(path==='/discord/reminders/test' && method==='POST')return json(await this.dmReminders.test(login));
+    const dm=/^\/events\/([a-f0-9-]{36})\/personal-reminders$/i.exec(path);
+    if(dm && method==='GET')return json(await this.dmReminders.status(login.userId,dm[1].toLowerCase()));
+    if(dm && method==='PUT')return json(await this.dmReminders.change(login,dm[1].toLowerCase(),await input(request)));
+    const personal = /^\/google\/personal\/([a-f0-9-]{36})$/i.exec(path);
+    if(personal && ['PUT','DELETE'].includes(method))return json(await this.personal.change(login,personal[1].toLowerCase(),method==='PUT'?await input(request):null,method==='DELETE'));
     if(path === '/google/status' && method === 'GET')return json(await this.google.status(login.userId));
     if(path === '/google/link' && method === 'POST')return json(await this.google.link(login));
     if(path === '/google/prepare' && method === 'POST')return json(await this.google.prepare(login.userId));
     if(path === '/google/disconnect' && method === 'POST')return json(await this.google.disconnect(login.userId));
     if(path === '/google/retry' && method === 'POST') {
-      let count=await this.subscriptions.retry(login);
+      let count=await this.subscriptions.retry(login); count+=await this.personal.retry(login);
       for(const [key,saved] of await this.store.list({prefix:'event:'}))if(saved.userId===login.userId && saved.record?.googleCalendarSync){
         await this.authorize(login,saved.guildId);await this.google.enqueue(key.slice(6),saved);count++;
       }
@@ -211,6 +220,7 @@ export class RelayCore {
     return count;
   }
   async publish(login,id,body) {
+    if((body.event??body.Event)?.personalOnly || (body.event??body.Event)?.PersonalOnly)throw new RelayError("Personal events cannot be published to Discord.");
     const {item,start,end,zone}=validate(body.event??body.Event,id);
     await requireFonts(this.store,login.userId,item.announcementStyle);
     const banner=body.bannerDataUrl??body.BannerDataUrl; imageData(banner);

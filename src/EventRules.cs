@@ -28,6 +28,7 @@ public static class EventRules
         }
         catch (Exception ex) when (ex is ArgumentException or TimeZoneNotFoundException or InvalidTimeZoneException)
         { return ex.Message; }
+        if (publish && item.PersonalOnly) return "Personal events cannot be published to Discord.";
         if (publish)
         {
             if (!ulong.TryParse(item.GuildId, out _)) return "Select a Discord server in Settings.";

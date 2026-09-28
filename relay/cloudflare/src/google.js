@@ -132,6 +132,7 @@ export class GoogleCalendar {
       if(job.due>Date.now()||processed>=4){remaining=true;continue;}
       processed++;
       try{
+        if(job.kind==='personal'){await this.core.personal.process(job);await this.store.delete(key);continue;}
         if(job.kind==='subscription'){
           await this.core.subscriptions.process(job);await this.store.delete(key);continue;
         }

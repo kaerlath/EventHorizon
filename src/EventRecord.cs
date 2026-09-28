@@ -2,6 +2,10 @@ namespace EventHorizon;
 
 public sealed class EventRecord
 {
+    public bool DiscordRemindersEnabled { get; set; }
+    public int DiscordAdvanceMinutes { get; set; } = 60;
+    public int DiscordNearMinutes { get; set; } = 15;
+    public bool PersonalOnly { get; set; }
     public bool ReadOnly { get; set; }
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Title { get; set; } = "";

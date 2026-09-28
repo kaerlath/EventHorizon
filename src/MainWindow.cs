@@ -197,7 +197,7 @@ public sealed partial class MainWindow : Window, IDisposable
     }
     private void CreateCopy(EventRecord item)
     {
-        var copy = item.Copy(); copy.Id = Guid.NewGuid(); copy.Status = "Draft"; copy.ReadOnly = false; copy.GoogleCalendarSync = false;
+        var copy = item.Copy(); copy.Id = Guid.NewGuid(); copy.Status = "Draft"; copy.ReadOnly = false; copy.GoogleCalendarSync = false; copy.DiscordRemindersEnabled = false;
         copy.DiscordEventId = ""; copy.DiscordMessageId = ""; copy.RelayOrigin = ""; BeginEdit(copy);
     }
     private void DrawDetails(EventRecord item)
@@ -223,6 +223,7 @@ public sealed partial class MainWindow : Window, IDisposable
         ImGui.BeginChild("DescriptionCard", new Vector2(0, Math.Max(110, ImGui.CalcTextSize(item.Description, false, ImGui.GetContentRegionAvail().X - 30).Y + 34)), true);
         PanelBackdrop();
         ImGui.TextWrapped(item.Description); ImGui.EndChild();
+        if (!item.PersonalOnly) {
         ImGui.Spacing(); Heading("Planned signup groups");
         ImGui.TextColored(Muted, "Mark your interest on Discord. Live role attendance is not available yet.");
         var groups = item.SignupGroups.Split('\n', StringSplitOptions.RemoveEmptyEntries);
@@ -241,6 +242,7 @@ public sealed partial class MainWindow : Window, IDisposable
             }
             ImGui.EndTable();
         }
+        }
         ImGui.Spacing();
         ImGui.BeginDisabled(IsReadOnly(item));
         if (ImGui.Button("Edit / Update event", new Vector2(190, 36))) BeginEdit(item);
@@ -251,18 +253,22 @@ public sealed partial class MainWindow : Window, IDisposable
         ImGui.BeginChild("EventDetailsCard", new Vector2(0, 0), true);
         PanelBackdrop();
         ImGui.TextColored(Accent, "EVENT DETAILS"); ImGui.Separator();
-        Detail("Organizer", item.Organizer); Detail("Server", item.Server); Detail("Channel", item.Channel);
+        Detail("Visibility", item.PersonalOnly ? "Personal — only me" : "Community");
+        Detail("Organizer", item.Organizer);
+        if (!item.PersonalOnly) { Detail("Server", item.Server); Detail("Channel", item.Channel); }
         Detail("Location", item.World + " — " + item.Location); Detail("Signups close", item.SignupsClose); Detail("Status", item.Status);
         if (item.Status != "Archived" && item.Status != "Template") DrawEventReminder(item);
+        if (item.PersonalOnly) { DrawPrivateCalendarActions(item); DrawDiscordReminders(item); }
         if (item.DiscordEventId.Length > 0)
         {
             if (ImGui.CollapsingHeader("My Google Calendar")) DrawPersonalCalendarActions(item);
             if (ImGui.Button("Open in Discord", new Vector2(-1, 36))) OpenUrl($"https://discord.com/events/{item.GuildId}/{item.DiscordEventId}");
             if (ImGui.Button("Copy event link", new Vector2(-1, 36))) { ImGui.SetClipboardText($"https://discord.com/events/{item.GuildId}/{item.DiscordEventId}"); message = "Event link copied."; }
         }
-        if (!IsReadOnly(item) && item.Status != "Archived" && ImGui.Button("Archive locally", new Vector2(-1, 36)))
+        if (item.PersonalOnly && item.DiscordRemindersEnabled) ImGui.TextWrapped("Turn off Discord DM reminders below their heading before archiving.");
+        if (!IsReadOnly(item) && item.Status != "Archived" && (!item.PersonalOnly || !item.DiscordRemindersEnabled) && ImGui.Button("Archive locally", new Vector2(-1, 36)))
         {
-            try { var archived = item.Copy(); archived.Status = "Archived"; store.Upsert(archived, section == "Templates"); message = "Archived locally. The Discord event is unchanged."; selected = null; }
+            try { var archived = item.Copy(); archived.Status = "Archived"; store.Upsert(archived, section == "Templates"); message = item.PersonalOnly ? "Archived locally. Any Google copy is unchanged." : "Archived locally. The Discord event is unchanged."; selected = null; }
             catch (Exception ex) { message = ex.Message; }
         }
         ImGui.EndChild();
@@ -316,6 +322,7 @@ public sealed partial class MainWindow : Window, IDisposable
         Heading(string.IsNullOrWhiteSpace(item.Title) ? "Untitled gathering" : item.Title);
         DrawSchedule(item); ImGui.Spacing(); DrawBanner(item, Math.Clamp(store.Appearance.BannerHeight, 240, 600)); ImGui.Spacing();
         ImGui.TextWrapped(item.Description);
+        if (item.PersonalOnly) { ImGui.TextWrapped("Personal event — no Discord post. Banner stays on this computer."); return; }
         ImGui.Separator(); ImGui.TextColored(Muted, "DISCORD POST PREVIEW");
         ImGui.TextWrapped($"Organizer: {item.Organizer}\nLocation: {item.World} — {item.Location}");
         ImGui.TextWrapped("Your relay combines the banner and event details into the Discord announcement. A composed card includes the title, description, date/time, organizer and location, with a working event link beneath it.");
@@ -324,6 +331,7 @@ public sealed partial class MainWindow : Window, IDisposable
     {
         ImGui.TextColored(Muted, "Events  >  Edit event");
         Heading(string.IsNullOrWhiteSpace(editor.Title) ? "Create your gathering" : editor.Title);
+        DrawVisibilityChoice();
         ImGui.Checkbox("Preview", ref preview);
         ImGui.BeginChild("EditorScroll", new Vector2(0, -82), false);
         if (preview) DrawPreview(editor);
@@ -331,10 +339,12 @@ public sealed partial class MainWindow : Window, IDisposable
         {
             Text("Title", editor.Title, 101, x => editor.Title = x);
             TextArea("Description", editor.Description, 1001, 100, x => editor.Description = x);
+            if (!editor.PersonalOnly) {
             DrawAnnouncementStyles();
             ImGui.BeginDisabled(!relay.Connected);
             if (ImGui.Button("Render announcement preview", new Vector2(270, 36))) RequestStyledPreview();
             ImGui.EndDisabled();
+            }
             ImGui.Separator(); ImGui.TextColored(Accent, "WHEN & WHERE");
             DrawDateTimePicker();
             if (ImGui.BeginCombo("Time zone", editor.TimeZoneId))
@@ -346,8 +356,9 @@ public sealed partial class MainWindow : Window, IDisposable
             { foreach (var minutes in new[] { 15, 30, 45, 60, 90, 120, 150, 180, 240, 300, 360, 480, 720, 1440 }) if (ImGui.Selectable($"{minutes / 60}h {minutes % 60:00}m", editor.DurationMinutes == minutes)) editor.DurationMinutes = minutes; ImGui.EndCombo(); }
             Text("World", editor.World, 80, x => editor.World = x); Text("Location", editor.Location, 101, x => editor.Location = x);
             Text("Organizer", editor.Organizer, 100, x => editor.Organizer = x);
-            ImGui.TextWrapped("Use an in-game or display name. Editing access stays with the Discord account that published the event.");
+            ImGui.TextWrapped(editor.PersonalOnly ? "Personal event — visible only in this installation and your optional Google copy." : "Use an in-game or display name. Editing access stays with the Discord account that published the event.");
             DrawBannerSelector();
+            if (!editor.PersonalOnly) {
             ImGui.TextWrapped("Personal calendar: after publishing, open the event and choose Add to my Google Calendar. Other players can subscribe without editing your event.");
             ImGui.Separator(); ImGui.TextColored(Accent, "DISCORD DESTINATION");
             ImGui.TextWrapped($"{editor.Server}  /  {editor.Channel}");
@@ -365,10 +376,12 @@ public sealed partial class MainWindow : Window, IDisposable
                 ImGui.TextWrapped("Custom signups and recurring publication require a later relay extension. These fields are saved locally.");
             }
         }
+        }
         ImGui.EndChild();
-        if (ImGui.Button(editor.DiscordEventId.Length > 0 ? "Save local changes" : "Save draft")) Save(false);
+        if (ImGui.Button(editor.PersonalOnly ? "Save personal event" : editor.DiscordEventId.Length > 0 ? "Save local changes" : "Save draft")) Save(false);
         ImGui.SameLine(); if (ImGui.Button("Save as template")) Save(true);
         ImGui.SameLine(); if (ImGui.Button("Cancel")) Navigate(() => editing = false);
+        if (editor.PersonalOnly) { DrawPersonalSaveButton(); return; }
         ImGui.BeginDisabled(!relay.Connected);
         if (ImGui.Button(editor.DiscordEventId.Length > 0 ? "Save & Sync to Discord" : "Publish to Discord", new Vector2(230, 30))) Publish();
         ImGui.EndDisabled();
@@ -489,10 +502,11 @@ public sealed partial class MainWindow : Window, IDisposable
     private void Save(bool template)
     {
         if (EventRules.Validate(editor) is { } error) { message = error; return; }
+        if (!template && editor.PersonalOnly && editor.DiscordRemindersEnabled) { SavePersonalWithReminders(); return; }
         var copy = editor.Copy(); copy.UpdatedUtc = DateTimeOffset.UtcNow;
-        if (template) { copy.Id = Guid.NewGuid(); copy.Status = "Template"; copy.DiscordEventId = ""; copy.DiscordMessageId = ""; copy.RelayOrigin = ""; }
-        else copy.Status = copy.DiscordEventId.Length > 0 ? "Published" : "Draft";
-        try { store.Upsert(copy, template); editing = false; selected = copy.Id; section = template ? "Templates" : copy.Status == "Draft" ? "Drafts" : "Events"; message = "Saved locally."; }
+        if (template) { copy.Id = Guid.NewGuid(); copy.Status = "Template"; copy.DiscordRemindersEnabled = false; copy.GoogleCalendarSync = false; copy.DiscordEventId = ""; copy.DiscordMessageId = ""; copy.RelayOrigin = ""; }
+        else copy.Status = copy.PersonalOnly ? "Personal" : copy.DiscordEventId.Length > 0 ? "Published" : "Draft";
+        try { store.Upsert(copy, template); editing = false; selected = copy.Id; section = template ? "Templates" : copy.Status == "Draft" ? "Drafts" : "Events"; message = copy.PersonalOnly && copy.GoogleCalendarSync ? "Saved locally. Use Save & sync my Google Calendar to send these changes to Google." : "Saved locally."; }
         catch (Exception ex) { message = "Save failed: " + ex.Message; }
     }
     private void Publish()
@@ -538,4 +552,3 @@ public sealed partial class MainWindow : Window, IDisposable
     }
     public void Dispose() { foreach (var file in previewFiles) try { File.Delete(file); } catch { } titleFont?.Dispose(); headingFont?.Dispose(); bodyFont?.Dispose(); relay.Dispose(); if (operation is { } task) _ = task.ContinueWith(t => _ = t.Exception, TaskContinuationOptions.OnlyOnFaulted); }
 }
-

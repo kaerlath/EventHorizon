@@ -200,6 +200,6 @@ public sealed partial class MainWindow
         ImGui.SameLine();
         if (ImGui.Button("Remove banner", new Vector2(150, 32))) { editor.BannerPath = ""; editor.RemoveBanner = true; }
         if (editor.BannerPath.Length > 0) ImGui.TextWrapped(Path.GetFileName(editor.BannerPath));
-        ImGui.TextDisabled("PNG or JPEG, up to 4 MB. Sent with your Discord event and announcement.");
+        ImGui.TextDisabled(editor.PersonalOnly ? "PNG or JPEG, up to 4 MB. Personal banners stay on this computer." : "PNG or JPEG, up to 4 MB. Sent with your Discord event and announcement.");
     }
 }
