@@ -60,11 +60,11 @@ References:
 
 ## Appearance and typography (0.6.0)
 
-### Readable Discord announcements (relay 0.14.1)
+### Complete artwork and readable Discord announcements (relay 0.15.1)
 
-Announcements now include the full description, title, start/end times, location and organizer as readable Discord message text, alongside a fixed 1200 × 680 landscape image. Discord controls the displayed image size; increasing resolution cannot force a larger preview. The compact artwork uses the selected title style and a large-text excerpt from the first description paragraph, with its paragraph style when provided. Remaining paragraphs and their individual visual styles are not included in this compact image; the complete description remains in the accompanying message. The banner fits without cropping.
+Announcements include the full description, title, start/end times, location and organizer as readable Discord message text, alongside the complete styled poster. The poster restores the full-width banner, every description paragraph with its selected styling, detail panel and planned signup groups. Capture grows to fit the content rather than clipping it to a compact excerpt. The banner fits without cropping. The image is a normal PNG attachment, with no embed wrapper. Discord still controls its preview dimensions; no larger display size is guaranteed.
 
-Deploy the Worker, then use **Save & Sync to Discord** on an existing event to replace its announcement in place. Existing posts keep their prior layout until synced. The plugin's rendered preview uses the same compact artwork. This relay-only update requires no new plugin DLL.
+Deploy the Worker, then use **Save & Sync to Discord** on an existing event to replace its announcement in place and clear its old embed wrapper. Existing posts keep their prior layout until synced. The plugin's rendered preview uses the same complete artwork. This relay-only update requires no new plugin DLL.
 
 The plugin's Appearance page saves five themes, a custom accent, border glow, reduced motion, animation speed and banner height locally. These preferences do not change other users' windows or the published announcement.
 
