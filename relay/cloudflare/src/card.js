@@ -54,15 +54,42 @@ export function cardHtml(item, organizer, banner, schedule, font, icon, extraFon
   </main><footer><span>Some events are worth falling into.</span><span>EVENT HORIZON</span></footer></article>
   <script nonce="eh-font-ready">Promise.all(Array.from(document.fonts,f=>f.load())).then(()=>document.fonts.ready).then(()=>{document.documentElement.dataset.fontsReady='true';}).catch(()=>{});</script></body></html>`;
 }
+// A fixed landscape card keeps Discord from reducing a long poster to a thumbnail.
+// The complete, untruncated description is sent as message text alongside this image.
+export function chatCardHtml(item,organizer,banner,schedule,font,icon,extraFonts='') {
+  imageData(banner);
+  const design=announcementStyle(item.announcementStyle),{date,period}=scheduleText(schedule);
+  const title={...design.title,size:Math.max(52,design.title.size),lineHeight:1.08};
+  const body={...(design.paragraphs[0]??design.body),size:Math.max(36,(design.paragraphs[0]??design.body).size),lineHeight:1.3};
+  const excerpt=(item.description||'Join us for a gathering in Eorzea.').split(/\n\s*\n/)[0];
+  return `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; script-src 'nonce-eh-font-ready'; base-uri 'none'">
+  <style>
+  @font-face{font-family:Cinzel;src:url(data:font/ttf;base64,${font})}${extraFonts}
+  *{box-sizing:border-box}html,body{margin:0;width:1200px;height:680px;overflow:hidden}
+  body{padding:18px;color:#edf1ff;background:#050a15;font:30px Arial,sans-serif}
+  article{height:644px;padding:24px;border:1px solid #728aba;border-radius:18px;background:radial-gradient(ellipse at 0 0,#233655,transparent 65%),#0b1324;display:grid;grid-template-rows:42px 140px minmax(0,1fr);gap:14px}
+  header{display:flex;gap:14px;align-items:center;color:#c4d7f5;font:25px Cinzel,serif;letter-spacing:4px}
+  header img{width:42px;height:42px}h1{margin:0;overflow:hidden;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;align-self:center}
+  main{display:grid;grid-template-columns:54% minmax(0,1fr);gap:26px;min-height:0}
+  .hero{width:100%;height:100%;min-height:0;object-fit:contain;border-radius:12px;border:1px solid #52698c;background:#060b16}
+  .empty{display:flex;justify-content:center;align-items:center;background:radial-gradient(ellipse,#344d7a,#0a1021)}.empty img{width:210px;height:210px}
+  .details{min-width:0;overflow:hidden}.date{font-size:32px;line-height:1.3;color:#d6e5ff;margin-bottom:12px}.time{font-size:28px;color:#adc7ee;margin-top:6px}
+  .excerpt{border-left:3px solid #a99cff;padding-left:16px;margin:16px 0 0;overflow:hidden;overflow-wrap:anywhere;white-space:pre-wrap;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;max-height:210px}
+  </style></head><body><article><header><img src="data:image/png;base64,${icon}" alt="">Event Horizon</header>
+  <h1 style="${styleCss(title)}">${E(item.title)}</h1><main>
+  ${banner?`<img class="hero" src="${E(banner)}" alt="Event banner">`:`<div class="hero empty"><img src="data:image/png;base64,${icon}" alt=""></div>`}
+  <section class="details"><div class="date">${E(date)}<div class="time">${E(period)}</div></div><p class="excerpt" style="${styleCss(body)}">${E(excerpt)}</p></section>
+  </main></article><script nonce="eh-font-ready">Promise.all(Array.from(document.fonts,f=>f.load())).then(()=>document.fonts.ready).then(()=>{document.documentElement.dataset.fontsReady='true';}).catch(()=>{});</script></body></html>`;
+}
 export function renderer(browser, fontBytes, iconBytes, assets, store) {
   const font=b64(new Uint8Array(fontBytes)),icon=b64(new Uint8Array(iconBytes));
   let lastKey='',lastImage;
   return async (item,organizer,banner,schedule) => {
     const extraFonts=await fontCss(announcementStyle(item.announcementStyle),assets,store);
-    const html=cardHtml(item,organizer,banner,schedule,font,icon,extraFonts);
+    const html=chatCardHtml(item,organizer,banner,schedule,font,icon,extraFonts);
     const key=b64(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(html))));
     if(key===lastKey && lastImage)return lastImage;
-    const response=await browser.quickAction('screenshot',{html,waitForSelector:{selector:'html[data-fonts-ready="true"]',timeout:15000},viewport:{width:1200,height:900,deviceScaleFactor:1},screenshotOptions:{type:'png',fullPage:true},gotoOptions:{waitUntil:'networkidle0',timeout:30000}});
+    const response=await browser.quickAction('screenshot',{html,waitForSelector:{selector:'html[data-fonts-ready="true"]',timeout:15000},viewport:{width:1200,height:680,deviceScaleFactor:1},screenshotOptions:{type:'png',fullPage:false},gotoOptions:{waitUntil:'networkidle0',timeout:30000}});
     if(!response.ok)throw new RelayError('Announcement rendering failed. Try Render preview with another font; a selected font may be invalid or Browser Run may be unavailable.',502);
     const reader=response.body.getReader(),chunks=[];let size=0;
     for(;;){const {value,done}=await reader.read();if(done)break;size+=value.length;if(size>MAX_IMAGE){await reader.cancel();throw new Error('Card exceeds 4 MB');}chunks.push(value);}

@@ -58,6 +58,12 @@ References:
 
 ## Appearance and typography (0.6.0)
 
+### Readable Discord announcements (relay 0.14.1)
+
+Announcements now include the full description, title, start/end times, location and organizer as readable Discord message text, alongside a fixed 1200 × 680 landscape image. Discord controls the displayed image size; increasing resolution cannot force a larger preview. The compact artwork uses the selected title style and a large-text excerpt from the first description paragraph, with its paragraph style when provided. Remaining paragraphs and their individual visual styles are not included in this compact image; the complete description remains in the accompanying message. The banner fits without cropping.
+
+Deploy the Worker, then use **Save & Sync to Discord** on an existing event to replace its announcement in place. Existing posts keep their prior layout until synced. The plugin's rendered preview uses the same compact artwork. This relay-only update requires no new plugin DLL.
+
 The plugin's Appearance page saves five themes, a custom accent, border glow, reduced motion, animation speed and banner height locally. These preferences do not change other users' windows or the published announcement.
 
 Each event stores independent title and description typography, with optional overrides for paragraphs separated by blank lines. Overrides follow paragraph positions; review them after rearranging text. Controls include size, bold, italic, underline, strike, color, alignment, outline, glow and letter/line spacing. Version 0.9 adds 18 shared font families and account-owned font imports; see FONT-LIBRARY.md. Browser font fallbacks remain for the three generic families. Local Windows font installations are not uploaded automatically. The native Discord event keeps plain text.

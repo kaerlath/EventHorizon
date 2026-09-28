@@ -1,3 +1,4 @@
+import {announcementText} from './announcement.js';
 import {EventDeletion} from './deletion.js';
 import {DmReminders} from './dm-reminders.js';
 import {PersonalEvents} from './personal.js';
@@ -64,7 +65,7 @@ export class RelayCore {
   }
   async route(request) {
     const u = new URL(request.url), path = u.pathname, method = request.method;
-    if (path === '/health' && method === 'GET') return json({service:'Event Horizon', version:'0.14.0', configured:this.configured, composition:'browser-run',googleCalendar:googleConfigured(this.env),fontLibrary:true});
+    if (path === '/health' && method === 'GET') return json({service:'Event Horizon', version:'0.14.1', configured:this.configured, composition:'browser-run',googleCalendar:googleConfigured(this.env),fontLibrary:true});
     if (!this.configured) throw new RelayError('The relay needs its public origin and Discord application credentials.',503);
     if (u.origin !== this.origin) throw new RelayError('Use the configured relay address.',400);
     if(path === '/discord/install' && method === 'GET')return json({url:botInstallUrl(this.env.DISCORD_CLIENT_ID)});
@@ -256,7 +257,7 @@ export class RelayCore {
       if(saved.messagePending) warning='Event saved. An earlier announcement has an uncertain result; operator reconciliation is required.';
       else {
         const url=`https://discord.com/events/${item.guildId}/${saved.eventId}`;
-        const message={allowed_mentions:{parse:[]},attachments:[{id:0,filename:'event-card.png',description:`${item.title} · ${item.startLocal} · ${item.location}`}],embeds:[{url,color:9278463,image:{url:'attachment://event-card.png'}}],components:[{type:1,components:[{type:2,style:5,label:'View event / Interested',url}]}]};
+        const message={content:announcementText(item,login.name,{start,end,zone}),allowed_mentions:{parse:[]},attachments:[{id:0,filename:'event-card.png',description:`${item.title} · ${item.startLocal} · ${item.location}`}],embeds:[{url,color:9278463,image:{url:'attachment://event-card.png'}}],components:[{type:1,components:[{type:2,style:5,label:'View event / Interested',url}]}]};
         try {
           if(!saved.messageId) {saved.messagePending=true;await this.store.put(key,saved);}
           const result=await this.discord(saved.messageId?'PATCH':'POST',`channels/${item.channelId}/messages${saved.messageId?'/'+saved.messageId:''}`,message,undefined,true,card);
