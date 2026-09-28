@@ -60,11 +60,11 @@ References:
 
 ## Appearance and typography (0.6.0)
 
-### Complete artwork and readable Discord announcements (relay 0.15.1)
+### Card-first announcements (relay 0.15.2)
 
-Announcements include the full description, title, start/end times, location and organizer as readable Discord message text, alongside the complete styled poster. The poster restores the full-width banner, every description paragraph with its selected styling, detail panel and planned signup groups. Capture grows to fit the content rather than clipping it to a compact excerpt. The banner fits without cropping. The image is a normal PNG attachment, with no embed wrapper. Discord still controls its preview dimensions; no larger display size is guaranteed.
+Announcements include the full description, title, start/end times, location and organizer as readable Discord message text, alongside the complete styled poster. The poster restores the full-width banner, every description paragraph with its selected styling, detail panel and planned signup groups. Capture grows to fit the content rather than clipping it to a compact excerpt. The banner fits without cropping. Components V2 orders the PNG attachment in a Media Gallery first, the complete readable text second, and the event link button last, all within one message. Discord still controls its preview dimensions; no larger display size is guaranteed.
 
-Deploy the Worker, then use **Save & Sync to Discord** on an existing event to replace its announcement in place and clear its old embed wrapper. Existing posts keep their prior layout until synced. The plugin's rendered preview uses the same complete artwork. This relay-only update requires no new plugin DLL.
+Deploy the Worker, then use **Save & Sync to Discord** on an existing event to replace its announcement in place and clear its old text/embeds. Converted messages use Discord Components V2 permanently; future updates must preserve that format. Existing posts keep their prior layout until synced. The plugin's rendered preview uses the same complete artwork. This relay-only update requires no new plugin DLL.
 
 The plugin's Appearance page saves five themes, a custom accent, border glow, reduced motion, animation speed and banner height locally. These preferences do not change other users' windows or the published announcement.
 

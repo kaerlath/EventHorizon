@@ -1,8 +1,22 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {announcementText} from '../src/announcement.js';
+import {announcementText,announcementMessage} from '../src/announcement.js';
 import {cardHtml,renderer} from '../src/card.js';
 const schedule={start:'2035-10-03T23:00:00Z',end:'2035-10-04T02:00:00Z',zone:'UTC'};
+test('new and existing announcements keep the complete card before text and button',()=>{
+  for(const editing of [false,true]){
+    const item={title:'Event',description:'Full details\n\nFinal paragraph',startLocal:'2035-10-03 23:00',location:'Garden'};
+    const message=announcementMessage(item,'Host',schedule,'https://discord.com/events/1/2',editing);
+    assert.equal(message.flags,32768);
+    assert.deepEqual(message.components.map(c=>c.type),[12,10,1]);
+    assert.equal(message.components[0].items[0].media.url,'attachment://'+message.attachments[0].filename);
+    assert.ok(message.components[1].content.includes(item.description));
+    assert.equal(message.components[2].components[0].url,'https://discord.com/events/1/2');
+    assert.deepEqual(message.allowed_mentions,{parse:[]});
+    if(editing){assert.equal(message.content,null);assert.deepEqual(message.embeds,[]);}
+    else {assert.ok(!('content' in message));assert.ok(!('embeds' in message));}
+  }
+});
 test('complete event details remain readable text, including overnight end date',()=>{
   const item={title:'Autumnal Masquerade',description:'First paragraph.\n\nSecond paragraph with https://example.com',world:'Mateus',location:'Lavender Beds',organizer:'Lynnaes'};
   const text=announcementText(item,'Fallback',schedule);

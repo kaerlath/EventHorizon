@@ -59,15 +59,17 @@ test('image signatures and URL restrictions',()=>{assert.deepEqual(imageData(ban
 test('permission member deny wins over roles',()=>{const p=permissions('123','42',{roles:[]},[{id:'123',permissions:'50176'}],{permission_overwrites:[{id:'42',type:1,deny:'1024',allow:'0'}]});assert.equal(canPost(p),false);});
 test('publishes one card and edits existing objects',async()=>{
   const {core,state}=setup(),e=event();const result=await core.publish(login,e.id,{event:e,bannerDataUrl:banner});assert.equal(result.eventId,'777');assert.equal(result.messageId,'888');
-  assert.deepEqual(state.writes[1].image,png);assert.deepEqual(state.writes[1].body.embeds,[]);assert.deepEqual(state.writes[1].body.allowed_mentions.parse,[]);
+  assert.deepEqual(state.writes[1].image,png);assert.equal(state.writes[1].body.flags,32768);assert.deepEqual(state.writes[1].body.allowed_mentions.parse,[]);
   assert.equal(state.writes[1].body.attachments[0].filename,'event-card.png');
-  assert.ok(state.writes[1].body.content.includes(e.description));
+  assert.deepEqual(state.writes[1].body.components.map(c=>c.type),[12,10,1]);
+  assert.ok(state.writes[1].body.components[1].content.includes(e.description));
   assert.equal((await core.store.get('art:'+e.id)).published,true);
   assert.equal(await core.store.get('art:'+e.id+':0'),Buffer.from(png).toString('base64'));
   assert.equal(state.writes[0].body.image,banner);await core.publish(login,e.id,{event:e});assert.deepEqual(state.writes.map(x=>x.method),['POST','POST','PATCH','PATCH']);
   assert.deepEqual(state.writes.at(-1).body.embeds,[], 'updates must explicitly clear the old image embed');
-  assert.ok(state.writes.at(-1).body.content.includes(e.description));
-  assert.equal(state.writes.at(-1).body.components[0].components[0].label,'View event / Interested');
+  assert.equal(state.writes.at(-1).body.content,null);
+  assert.ok(state.writes.at(-1).body.components[1].content.includes(e.description));
+  assert.equal(state.writes.at(-1).body.components[2].components[0].label,'View event / Interested');
 });
 test('source image survives restart and can be removed',async()=>{
   const {core,store,state,render,fetcher}=setup(),e=event();await core.publish(login,e.id,{event:e,bannerDataUrl:banner});const restarted=new RelayCore(store,env,render,fetcher);

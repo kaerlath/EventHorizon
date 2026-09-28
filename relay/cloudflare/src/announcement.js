@@ -9,3 +9,18 @@ export function announcementText(item,organizer,schedule){
   lines.push('',`**Organizer:** ${plain(item.organizer||organizer)}`);
   return lines.join('\n');
 }
+
+export function announcementMessage(item,organizer,schedule,url,editing=false){
+  const description=`${item.title} · ${item.startLocal} · ${item.location}`;
+  return {
+    flags:32768, // Components V2 preserves image -> text -> button ordering.
+    ...(editing?{content:null,embeds:[]}:{}), // Clear legacy fields on existing posts.
+    allowed_mentions:{parse:[]},
+    attachments:[{id:0,filename:'event-card.png',description}],
+    components:[
+      {type:12,items:[{media:{url:'attachment://event-card.png'},description}]},
+      {type:10,content:announcementText(item,organizer,schedule)},
+      {type:1,components:[{type:2,style:5,label:'View event / Interested',url}]}
+    ]
+  };
+}
