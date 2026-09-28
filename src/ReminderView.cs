@@ -69,7 +69,7 @@ public sealed partial class MainWindow
     }
     public void OpenReminder(EventReminder reminder)
     {
-        IsOpen = true;
+        RestoreWindow();
         Navigate(() =>
         {
             var item = Find(reminder.EventId);

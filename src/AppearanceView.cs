@@ -15,6 +15,14 @@ public sealed partial class MainWindow
         _ => new(.68f, .66f, 1, 1)
     };
     private Vector4 Surface(float amount) => Vector4.Lerp(new Vector4(.025f, .035f, .065f, 1), Accent, amount);
+    private float BackgroundOpacity => float.IsFinite(store.Appearance.BackgroundOpacity) ? Math.Clamp(store.Appearance.BackgroundOpacity, .1f, 1) : 1;
+    private Vector4 BackgroundSurface(float amount)
+    {
+        var color = Surface(amount);
+        // Main background + custom panel/header are two composited layers.
+        color.W = 1 - MathF.Sqrt(1 - BackgroundOpacity);
+        return color;
+    }
     private static uint Color(Vector4 color) => ImGui.ColorConvertFloat4ToU32(color);
     private static Vector4 ParseColor(string? hex, Vector4 fallback)
     {
@@ -42,6 +50,9 @@ public sealed partial class MainWindow
             ImGui.EndCombo();
         }
         changed |= EditColor("Accent color", Hex(new Vector3(Accent.X, Accent.Y, Accent.Z)), x => settings.Accent = x);
+        var opacity = BackgroundOpacity * 100;
+        if (ImGui.SliderFloat("Window background opacity", ref opacity, 10, 100, "%.0f%%")) { settings.BackgroundOpacity = opacity / 100; changed = true; }
+        ImGui.TextWrapped("Lower this to see the game through the window. Text, buttons and event images stay readable. This does not change your Discord artwork.");
         var glows = settings.Glows; if (ImGui.Checkbox("Luminous borders", ref glows)) { settings.Glows = glows; changed = true; }
         var motion = settings.ReduceMotion; if (ImGui.Checkbox("Reduce motion", ref motion)) { settings.ReduceMotion = motion; changed = true; }
         ImGui.TextWrapped("Reduced motion keeps a steady highlight and stops the rotating gravity drive.");

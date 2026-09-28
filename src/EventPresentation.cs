@@ -26,7 +26,7 @@ public sealed partial class MainWindow
     {
         var p = ImGui.GetWindowPos(); var size = ImGui.GetWindowSize();
         ImGui.GetWindowDrawList().AddRectFilledMultiColor(p, p + size,
-            Color(Surface(.12f)), Color(Surface(.035f)), Color(Surface(.02f)), Color(Surface(.055f)));
+            Color(BackgroundSurface(.12f)), Color(BackgroundSurface(.035f)), Color(BackgroundSurface(.02f)), Color(BackgroundSurface(.055f)));
     }
 
     private bool ActionButton(string text, FontAwesomeIcon icon, float width = 150, bool primary = false)

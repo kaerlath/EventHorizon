@@ -63,12 +63,15 @@ public sealed partial class MainWindow
         var start = ImGui.GetCursorScreenPos();
         var width = ImGui.GetContentRegionAvail().X;
         var draw = ImGui.GetWindowDrawList();
-        draw.AddRectFilledMultiColor(start, start + new Vector2(width, 84), Color(Surface(.20f)), Color(Surface(.045f)), Color(Surface(.02f)), Color(Surface(.12f)));
+        draw.AddRectFilledMultiColor(start, start + new Vector2(width, 84), Color(BackgroundSurface(.20f)), Color(BackgroundSurface(.045f)), Color(BackgroundSurface(.02f)), Color(BackgroundSurface(.12f)));
         draw.AddLine(start + new Vector2(0, 83), start + new Vector2(width, 83), Color(Surface(.45f)));
         for (var i = 0; i < 22; i++)
             draw.AddCircleFilled(start + new Vector2((i * 173.1f) % width, 8 + (i * 23.7f) % 67), .6f, 0x448BAEDA);
         ImGui.SetCursorScreenPos(start + new Vector2(8, 0));
         DrawOrb(78);
+        ImGui.SetCursorScreenPos(start + new Vector2(8, 0));
+        if (ImGui.InvisibleButton("Minimize Event Horizon", new Vector2(78))) MinimizeToIcon();
+        if (ImGui.IsItemHovered()) ImGui.SetTooltip("Click to minimize to the animated icon");
         ImGui.SetCursorScreenPos(start + new Vector2(96, 25));
         using (titleFont?.Push()) ImGui.TextColored(new Vector4(.87f, .91f, 1, 1), "E V E N T   H O R I Z O N");
         if (width > 900)

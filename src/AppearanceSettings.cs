@@ -9,4 +9,5 @@ public sealed class AppearanceSettings
     public float GlowStrength { get; set; } = .8f;
     public float AnimationSpeed { get; set; } = 1;
     public float BannerHeight { get; set; } = 340;
+    public float BackgroundOpacity { get; set; } = 1;
 }

@@ -18,6 +18,7 @@ public sealed class Plugin : IDalamudPlugin
     private readonly MainWindow main;
     private readonly ReminderWindow reminders;
     private readonly EventConfirmationWindow confirmation;
+    private readonly MinimizedWindow minimized;
     private DateTime nextBackgroundCheck;
 
     public Plugin(IDalamudPluginInterface pluginInterface, ICommandManager commands, IPluginLog log, ITextureProvider textures, IFramework framework, IClientState clientState)
@@ -31,11 +32,13 @@ public sealed class Plugin : IDalamudPlugin
         // Dalamud can load assemblies from memory, where Assembly.Location is empty.
         main = new MainWindow(store, textures, pluginInterface.AssemblyLocation.Directory!.FullName, ui);
         windows.AddWindow(main);
+        minimized = new MinimizedWindow(main);
+        windows.AddWindow(minimized);
         reminders = new ReminderWindow(store, main);
         windows.AddWindow(reminders);
         confirmation = new EventConfirmationWindow(main);
         windows.AddWindow(confirmation);
-        commands.AddHandler(Command, new CommandInfo((_, _) => main.IsOpen = !main.IsOpen)
+        commands.AddHandler(Command, new CommandInfo((_, _) => { if (main.IsMinimized) main.RestoreWindow(); else main.IsOpen = !main.IsOpen; })
         {
             HelpMessage = "Open the Event Horizon event planner."
         });
@@ -46,11 +49,12 @@ public sealed class Plugin : IDalamudPlugin
         if (store.LoadError is not null) log.Error("Event Horizon data could not be read: {Error}", store.LoadError);
     }
 
-    private void Open() => main.IsOpen = true;
+    private void Open() => main.RestoreWindow();
     private void Draw()
     {
         reminders.UpdateVisibility();
         confirmation.UpdateVisibility();
+        minimized.UpdateVisibility();
         windows.Draw();
     }
 

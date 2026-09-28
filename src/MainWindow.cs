@@ -43,11 +43,11 @@ public sealed partial class MainWindow : Window, IDisposable
         Size = new Vector2(1120, 760); SizeCondition = ImGuiCond.FirstUseEver;
         SizeConstraints = new WindowSizeConstraints { MinimumSize = new Vector2(850, 580), MaximumSize = new Vector2(float.MaxValue) };
     }
-    public void OpenSettings() { IsOpen = true; Navigate(() => { section = "Settings"; selected = null; editing = false; }); }
+    public void OpenSettings() { RestoreWindow(); Navigate(() => { section = "Settings"; selected = null; editing = false; }); }
     public override void PreDraw()
     {
-        ImGui.PushStyleColor(ImGuiCol.WindowBg, Surface(.015f));
-        ImGui.PushStyleColor(ImGuiCol.ChildBg, Surface(.045f));
+        ImGui.PushStyleColor(ImGuiCol.WindowBg, BackgroundSurface(.015f));
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, Vector4.Zero);
         ImGui.PushStyleColor(ImGuiCol.Border, Surface(.42f));
         ImGui.PushStyleColor(ImGuiCol.Button, Surface(.28f));
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Surface(.45f));
@@ -64,7 +64,7 @@ public sealed partial class MainWindow : Window, IDisposable
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(10, 9));
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(10, 6));
     }
-    public override void PostDraw() { ImGui.PopStyleVar(4); ImGui.PopStyleColor(13); }
+    public override void PostDraw() { ImGui.PopStyleVar(4); ImGui.PopStyleColor(13); FinishRestoreGeometry(); }
     private void ProcessPendingOperation()
     {
         if (operation is { IsCompleted: true })
@@ -114,7 +114,7 @@ public sealed partial class MainWindow : Window, IDisposable
         else if (section == "Help") DrawHelp();
         else if (section == "About")
         {
-            DrawOrb(110); ImGui.TextColored(Accent, "EVENT HORIZON  /  0.14.0");
+            DrawOrb(110); ImGui.TextColored(Accent, "EVENT HORIZON  /  0.16.0");
             ImGui.TextUnformatted("Title font: " + titleFontName);
             ImGui.Checkbox("Animate gravity drive", ref animateOrb);
             ImGui.TextWrapped("A space-gothic event workspace for Eorzea. Plan locally, then publish native Discord events and rich announcements through your own relay.");

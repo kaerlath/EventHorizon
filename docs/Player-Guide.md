@@ -1,8 +1,10 @@
 # Event Horizon — Player Guide
 
-Version 0.15.0. Open the addon with `/eventhorizon`. This guide is also available in-game under **Help & Walkthrough**.
+Version 0.16.0. Open the addon with `/eventhorizon`. This guide is also available in-game under **Help & Walkthrough**.
 
 ## 1. Welcome to Event Horizon
+
+Click the animated icon at the upper left to minimize the planner to just the orb. Click it again to restore the same window size and position, current page and unsaved editor. `/eventhorizon` also restores it. Reminders and Discord renewal continue in the background. In **Appearance**, use **Window background opacity** (10–100%) to see the game through the background while text and controls remain readable. This saves on your computer and does not change Discord artwork; Restore defaults returns to 100%.
 
 Plan an event, share it with your Discord community, and choose your own reminders. Follow the guide in order, or jump to any topic. You can return using Help & Walkthrough in the sidebar.
 
@@ -135,7 +137,7 @@ Choose **Cancel** or another sidebar page. A separate Event Horizon confirmation
 ## Delete a published community event
 
 1. Connect the same Discord account that originally published the event, using its original relay. The organizer display name does not grant deletion rights.
-2. Open the event in **View** and choose **Delete published event...**. You can also open an old event from History.
+2. Open the event in **View**. In the right-hand **Event Details** panel, scroll below **Open in Discord** and **Copy event link**, then choose **Delete published event...**. You can also open an old event from History.
 3. Read the confirmation, then choose **Delete everywhere**, or **Keep event** to cancel.
 4. The relay withdraws the event from community listings, deletes its Discord announcement and scheduled event, and queues deletion of Google copies managed by Event Horizon for the organizer and subscribers.
 5. Open the deletion record under **History** and choose **Check deletion status**. It reports outstanding Google copies. Use **Retry remaining cleanup** after resolving permissions or service failures.
