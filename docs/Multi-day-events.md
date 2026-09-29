@@ -6,7 +6,7 @@ In **Create Event → Schedule**, choose:
 - **Continuous multi-day**: explicit start and end dates/times. Every overlapping calendar day shows the event.
 - **Multiple sessions**: up to 12 separate start/end pairs within 366 days. Times can differ each day. Gaps stay empty on the in-game calendar. Sessions cannot overlap; ambiguous or skipped daylight-saving times must be changed.
 
-Calendar capsules use consistent lanes across each week. Month view shows up to four lanes and week view up to seven; +more indicates additional events in the full list. Select any active day to see the complete event list below it. Player events are listed before official entries. The event's View lists every session in your local time zone.
+Calendar capsules use consistent lanes across each week. Month view shows up to six lanes and week view up to ten; +more indicates additional events in the full list. Select any active day to see the complete event list below it. Player events are listed before official entries. The event's View lists every session in your local time zone.
 
 Your personal on-screen reminder follows each session. Dismissing one occurrence does not dismiss the next. Opted-in personal Discord DMs also follow each session, even out of game; missed reminder times are skipped.
 

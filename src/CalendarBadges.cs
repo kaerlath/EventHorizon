@@ -5,7 +5,9 @@ namespace EventHorizon;
 
 public sealed partial class MainWindow
 {
-    private float CalendarBadgeHeight => ImGui.GetFontSize() * CalendarScale(store.Appearance.CalendarFontScale) + 16;
+    private float CalendarBadgeFontSize => ImGui.GetFontSize() * CalendarScale(store.Appearance.CalendarFontScale) * .8f;
+    private float CalendarBadgeHeight => CalendarBadgeFontSize + 6;
+    private const float CalendarBadgeGap = 4;
     private Guid? calendarDetailId;
 
     private void DrawEventCategoryEditor()
@@ -34,20 +36,23 @@ public sealed partial class MainWindow
         if (!continuesRight) corners |= ImDrawFlags.RoundCornersRight;
         if (!continuesLeft || !continuesRight) corners &= ~ImDrawFlags.RoundCornersNone;
         if (store.Appearance.Glows)
-            for (var ring = 3; ring >= 1; ring--)
-                draw.AddRect(top - new Vector2(ring), bottom + new Vector2(ring), Color(badge.Color with { W = .08f * Math.Clamp(store.Appearance.GlowStrength, 0, 1) }), 10, corners, 2);
-        draw.AddRectFilled(top, bottom, Color(badge.Color with { W = calendarDetailId == item.Id ? .35f : hovered ? .26f : .14f }), 10, corners);
-        draw.AddRect(top, bottom, Color(badge.Color), 10, corners, calendarDetailId == item.Id ? 2.5f : 1.5f);
-        var fontSize = Math.Min(ImGui.GetFontSize() * CalendarScale(store.Appearance.CalendarFontScale), Math.Max(8, (width - 34) / ImGui.CalcTextSize(badge.Code).X * ImGui.GetFontSize()));
+            for (var ring = 2; ring >= 1; ring--)
+                draw.AddRect(top - new Vector2(ring), bottom + new Vector2(ring), Color(badge.Color with { W = .06f * Math.Clamp(store.Appearance.GlowStrength, 0, 1) }), CalendarBadgeHeight / 2, corners, 1);
+        draw.AddRectFilled(top, bottom, Color(badge.Color with { W = calendarDetailId == item.Id ? .35f : hovered ? .26f : .14f }), CalendarBadgeHeight / 2, corners);
+        draw.AddRect(top, bottom, Color(badge.Color), CalendarBadgeHeight / 2, corners, calendarDetailId == item.Id ? 1.8f : 1);
+        var fontSize = Math.Min(CalendarBadgeFontSize, Math.Max(8, (width - 30) / ImGui.CalcTextSize(badge.Code).X * ImGui.GetFontSize()));
         draw.AddText(ImGui.GetFont(), fontSize, top + new Vector2(8, (CalendarBadgeHeight - fontSize) / 2), Color(new Vector4(.96f,.97f,1,1)), badge.Code);
-        var center = new Vector2(bottom.X - 14, top.Y + CalendarBadgeHeight / 2);
+        var center = new Vector2(bottom.X - 12, top.Y + CalendarBadgeHeight / 2);
         var infoHovered = false;
         if (width > 55)
         {
-            draw.AddCircleFilled(center, 8, Color(new Vector4(.02f,.03f,.06f,1)));
-            draw.AddCircle(center, 8, Color(badge.Color));
-            draw.AddText(center - ImGui.CalcTextSize("i") / 2, Color(new Vector4(1)), "i");
-            infoHovered = dayHovered && ImGui.IsMouseHoveringRect(center - new Vector2(10), center + new Vector2(10));
+            var radius = Math.Clamp(CalendarBadgeFontSize * .45f, 4, 7);
+            draw.AddCircleFilled(center, radius, Color(new Vector4(.02f,.03f,.06f,1)));
+            draw.AddCircle(center, radius, Color(badge.Color));
+            var iconFontSize = radius * 1.6f;
+            draw.AddText(ImGui.GetFont(), iconFontSize, center - ImGui.CalcTextSize("i") * (iconFontSize / ImGui.GetFontSize()) / 2, Color(new Vector4(1)), "i");
+            var hitRadius = Math.Min(CalendarBadgeHeight / 2, 9);
+            infoHovered = hovered && ImGui.IsMouseHoveringRect(center - new Vector2(hitRadius), center + new Vector2(hitRadius));
         }
         if (hovered && !infoHovered && clicked) calendarDetailId = item.Id;
         return infoHovered;

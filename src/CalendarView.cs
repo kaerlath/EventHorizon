@@ -49,8 +49,8 @@ public sealed partial class MainWindow
             {
                 var week = first.AddDays(row * 7);
                 var lanes = CalendarLanes.Build(valid,week,zone);
-                var shownLanes = Math.Min(lanes.Length, calendarWeekly ? 7 : 4);
-                var height = 36 + shownLanes * (CalendarBadgeHeight + 6) + 28;
+                var shownLanes = Math.Min(lanes.Length, calendarWeekly ? 10 : 6);
+                var height = 36 + shownLanes * (CalendarBadgeHeight + CalendarBadgeGap) + 28;
                 for (var column = 0; column < 7; column++)
                 {
                     ImGui.TableNextColumn();
@@ -74,7 +74,7 @@ public sealed partial class MainWindow
                         var left = column > 0 && CalendarLanes.CrossesMidnight(entry,day,zone);
                         var right = column < 6 && CalendarLanes.CrossesMidnight(entry,day.AddDays(1),zone);
                         var x = left ? 0 : 6; var width = Math.Max(1,size.X-x-(right ? 0 : 6));
-                        if (DrawCalendarBadge(entry,top+new Vector2(x,30+lane*(CalendarBadgeHeight+6)),width,hover,clicked,left,right)) info = entry;
+                        if (DrawCalendarBadge(entry,top+new Vector2(x,30+lane*(CalendarBadgeHeight+CalendarBadgeGap)),width,hover,clicked,left,right)) info = entry;
                     }
                     if (entries.Length > displayed) draw.AddText(top+new Vector2(8,height-23),Color(Muted),$"+{entries.Length-displayed} more");
                     draw.PopClipRect();

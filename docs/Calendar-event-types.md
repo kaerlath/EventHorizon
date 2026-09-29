@@ -18,7 +18,7 @@ All events use compact colored capsules. Color identifies the category, not whet
 
 **Click the capsule body** to select its day and open full event details below the calendar. Descriptions, location, organizer, artwork, links, tags and existing actions remain in that view. Requirements, rewards and notes can be included in the description. **Back** closes the lower details. Click an empty part of a day for its complete event list; **View** also opens the lower details.
 
-Continuous multi-day events retain one lane throughout the week and join across midnight. Session gaps do not connect. Ranges wrap at the end of each calendar week. Month view shows up to four lanes and week view up to seven. **+more** means additional events are available in the list beneath the calendar; no events are removed by the visual limit.
+Continuous multi-day events retain one lane throughout the week and join across midnight. Session gaps do not connect. Ranges wrap at the end of each calendar week. Month view shows up to six lanes and week view up to ten. **+more** means additional events are available in the list beneath the calendar; no events are removed by the visual limit.
 
 In the editor, choose **Event type** and enter optional **Tags (comma-separated)**, up to 250 characters. Examples: RP, Combat, Market, Performance, Ball, Formal, Hunt, Raid, Investigation, Venue. Search includes tags and category names. Categories and tags survive saving and relay recovery/community loading after deploying relay 0.17.1.
 
