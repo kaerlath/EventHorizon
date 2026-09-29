@@ -114,7 +114,7 @@ public sealed partial class MainWindow : Window, IDisposable
         else if (section == "Help") DrawHelp();
         else if (section == "About")
         {
-            DrawOrb(110); ImGui.TextColored(Accent, "EVENT HORIZON  /  0.16.0");
+            DrawOrb(110); ImGui.TextColored(Accent, "EVENT HORIZON  /  0.16.1");
             ImGui.TextUnformatted("Title font: " + titleFontName);
             ImGui.Checkbox("Animate gravity drive", ref animateOrb);
             ImGui.TextWrapped("A space-gothic event workspace for Eorzea. Plan locally, then publish native Discord events and rich announcements through your own relay.");
@@ -200,6 +200,7 @@ public sealed partial class MainWindow : Window, IDisposable
         ImGui.Spacing(); Heading(item.Title);
         if (item.Status is "Deleting" or "Deleted") { ImGui.TextWrapped("This event has been withdrawn. Check status below for remaining Discord or Google cleanup."); DrawDeletionControls(item); return; }
         DrawSchedule(item);
+        DrawCalendarTextStyle(item);
         if (item.DiscordEventId.Length > 0)
         {
             ImGui.Checkbox("Show announcement artwork", ref showAnnouncement);

@@ -9,6 +9,11 @@ int passed = 0;
 void Check(bool condition, string name) { if (!condition) throw new Exception(name); passed++; Console.WriteLine("PASS " + name); }
 async Task Reject(Func<Task> action, string name) { try { await action(); } catch { Check(true, name); return; } throw new Exception(name); }
 EventRecord Make() => new() { Title = "Moonlit gathering", Description = "A community evening", StartLocal = DateTime.UtcNow.AddDays(2).ToString("yyyy-MM-dd HH:mm"), TimeZoneId = "UTC", Location = "Lavender Beds", World = "Balmung", GuildId = "123", ChannelId = "456" };
+Check(CalendarText.Wrap("Autumnal Masquerade", 10, s => s.Length).SequenceEqual(new[] { "Autumnal", "Masquerade" }), "calendar wraps words");
+Check(CalendarText.Wrap("Autumnal Masquerade", 30, s => s.Length).Length == 1, "wide calendar title stays single line");
+Check(CalendarText.Wrap("abcdefghij", 4, s => s.Length).SequenceEqual(new[] { "abcd", "efgh", "ij" }), "long calendar words wrap");
+Check(CalendarText.Wrap("A\nB", 9, s => s.Length).SequenceEqual(new[] { "A", "B" }), "calendar newlines survive");
+Check(CalendarText.Wrap("\U0001F600\U0001F600", 1, s => s.Length).SequenceEqual(new[] { "\U0001F600", "\U0001F600" }), "calendar Unicode survives");
 var sample = Make();
 var privateEvent = Make(); privateEvent.PersonalOnly = true; privateEvent.GuildId = ""; privateEvent.ChannelId = ""; privateEvent.Location = ""; privateEvent.Status = "Personal";
 Check(EventRules.Validate(privateEvent) is null, "personal event needs no Discord destination or location");
@@ -78,10 +83,15 @@ var appearanceFolder = Path.Combine(root, "appearance");
 var appearanceStore = new EventStore(appearanceFolder);
 appearanceStore.Appearance.Theme = "Aurora"; appearanceStore.Appearance.ReduceMotion = true;
 appearanceStore.Appearance.BackgroundOpacity = .45f;
+appearanceStore.Appearance.CalendarFontScale = .8f;
+appearanceStore.Appearance.CalendarTextColor = "#FF0000";
+appearanceStore.Appearance.CalendarEventStyles["test-event"] = new() { Scale = .7f, Color = "#CC0000" };
 var styled = Make(); styled.GoogleCalendarSync = true; styled.AnnouncementStyle.Title.Outline = 2;
 styled.AnnouncementStyle.Paragraphs[1] = new() { Italic = true, Size = 30 };
 appearanceStore.Upsert(styled);
 var loadedAppearance = new EventStore(appearanceFolder);
+Check(loadedAppearance.Appearance.CalendarFontScale == .8f && loadedAppearance.Appearance.CalendarTextColor == "#FF0000" && loadedAppearance.Appearance.CalendarEventStyles["test-event"].Scale == .7f, "calendar preferences persist");
+Check(store.Appearance.CalendarFontScale == 1 && store.Appearance.CalendarEventStyles.Count == 0, "legacy calendar defaults");
 Check(loadedAppearance.Appearance.Theme == "Aurora" && loadedAppearance.Appearance.ReduceMotion, "appearance preferences persist");
 Check(loadedAppearance.Appearance.BackgroundOpacity == .45f && store.Appearance.BackgroundOpacity == 1, "opacity persists and existing settings default to opaque");
 Check(loadedAppearance.Events[0].GoogleCalendarSync && !store.Events[0].GoogleCalendarSync, "Google sync opt-in persists with legacy default off");
@@ -264,4 +274,3 @@ sealed class FakeDiscord : HttpMessageHandler
         return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(JsonSerializer.Serialize(data), System.Text.Encoding.UTF8, "application/json") };
     }
 }
-

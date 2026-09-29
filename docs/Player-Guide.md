@@ -1,6 +1,6 @@
 # Event Horizon — Player Guide
 
-Version 0.16.0. Open the addon with `/eventhorizon`. This guide is also available in-game under **Help & Walkthrough**.
+Version 0.16.1. Open the addon with `/eventhorizon`. This guide is also available in-game under **Help & Walkthrough**.
 
 ## 1. Welcome to Event Horizon
 

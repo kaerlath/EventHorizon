@@ -23,3 +23,5 @@ relay/publish/
 **/credentials*.json
 **/events.json
 **/catalog.tmp
+
+.build-temp/

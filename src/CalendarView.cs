@@ -32,7 +32,7 @@ public sealed partial class MainWindow
             ImGui.EndCombo();
         }
         first = calendarWeekly ? EventCalendar.WeekStart(calendarFocus) : EventCalendar.MonthStart(calendarFocus);
-        ImGui.TextColored(Muted, "Local and loaded community events · Times shown in " + zone.DisplayName);
+        ImGui.PushStyleColor(ImGuiCol.Text, Muted); ImGui.TextWrapped("Local and loaded community events · Times shown in " + zone.DisplayName); ImGui.PopStyleColor();
         var intervals = events.Select(item => (Item: item, Times: EventCalendar.Interval(item, zone)))
             .Where(x => x.Times is not null).OrderBy(x => x.Times!.Value.Start).ToArray();
         EventRecord[] OnDay(DateTime day) => intervals.Where(x => x.Times!.Value.Start < day.AddDays(1) && x.Times.Value.End > day)
@@ -47,6 +47,19 @@ public sealed partial class MainWindow
             {
                 ImGui.TableNextColumn();
                 var day = first.AddDays(index); var entries = OnDay(day);
+                var width = Math.Max(1, ImGui.GetContentRegionAvail().X - 16);
+                if (index % 7 == 0)
+                {
+                    height = calendarWeekly ? 200 : 76;
+                    for (var d = 0; d < 7; d++)
+                    {
+                        var daily = OnDay(first.AddDays(index + d));
+                        var shown = daily.Take(calendarWeekly ? 7 : 1);
+                        var needed = 37f + shown.Sum(e => CalendarLines(e.Title, width, CalendarStyle(e).Scale).Length * ImGui.GetFontSize() * CalendarStyle(e).Scale + 5);
+                        if (daily.Length > (calendarWeekly ? 7 : 1)) needed += ImGui.GetTextLineHeight() + 4;
+                        height = Math.Max(height, needed);
+                    }
+                }
                 var start = ImGui.GetCursorScreenPos(); var size = new Vector2(ImGui.GetContentRegionAvail().X, height);
                 var active = day == calendarSelection; var today = day == DateTime.Today;
                 if (ImGui.InvisibleButton("day" + index, size)) calendarSelection = day;
@@ -60,8 +73,18 @@ public sealed partial class MainWindow
                 {
                     draw.AddCircleFilled(start + new Vector2(size.X - 12, 13), 3, Color(Accent));
                     var max = calendarWeekly ? 7 : 1;
-                    for (var j = 0; j < Math.Min(entries.Length, max); j++)
-                        draw.AddText(start + new Vector2(8, 29 + j * 20), 0xFFE8C6B9, entries[j].Title);
+                    var y = 29f;
+                    foreach (var entry in entries.Take(max))
+                    {
+                        var style = CalendarStyle(entry);
+                        var fontSize = ImGui.GetFontSize() * style.Scale;
+                        foreach (var line in CalendarLines(entry.Title, width, style.Scale))
+                        {
+                            draw.AddText(ImGui.GetFont(), fontSize, start + new Vector2(8, y), Color(ParseColor(style.Color, new Vector4(.725f, .776f, .91f, 1))), line);
+                            y += fontSize;
+                        }
+                        y += 5;
+                    }
                     if (entries.Length > max) draw.AddText(start + new Vector2(8, height - 22), 0xFFD5AE9C, $"+{entries.Length - max} more");
                 }
                 draw.PopClipRect();
