@@ -292,7 +292,7 @@ public sealed class Relay
                 announcementBanner = (await cardRenderer.Render(item, string.IsNullOrWhiteSpace(item.Organizer) ? login.Name : item.Organizer, effectiveBanner), "image/png", "event-card.png");
             var start = EventRules.Start(item);
             var location = string.IsNullOrWhiteSpace(item.World) ? item.Location : item.World + " — " + item.Location;
-            var payload = new Dictionary<string, object?> { ["name"] = item.Title, ["description"] = item.Description,
+            var payload = new Dictionary<string, object?> { ["name"] = item.Title, ["description"] = EventRules.DiscordDescription(item),
                 ["scheduled_start_time"] = start, ["scheduled_end_time"] = start.AddMinutes(item.DurationMinutes),
                 ["privacy_level"] = 2, ["entity_type"] = 3, ["channel_id"] = null, ["entity_metadata"] = new { location } };
             // Omitted means preserve the cover, empty means explicitly remove it.

@@ -13,6 +13,7 @@ public sealed partial class MainWindow
     {
         enabled, minutes = new[] { item.DiscordAdvanceMinutes, item.DiscordNearMinutes },
         @event = new { id = item.Id, title = item.Title, startLocal = item.StartLocal,
+            scheduleMode = item.ScheduleMode, endLocal = item.EndLocal, sessions = item.Sessions,
             timeZoneId = item.TimeZoneId, durationMinutes = item.DurationMinutes, personalOnly = true }
     };
 

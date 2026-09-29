@@ -2,6 +2,11 @@ namespace EventHorizon;
 
 public sealed class EventRecord
 {
+    public string ScheduleMode { get; set; } = "Single";
+    public string EndLocal { get; set; } = "";
+    public List<EventSession> Sessions { get; set; } = [];
+    public bool InformationOnly { get; set; }
+    public string SourceUrl { get; set; } = "";
     public bool DiscordRemindersEnabled { get; set; }
     public int DiscordAdvanceMinutes { get; set; } = 60;
     public int DiscordNearMinutes { get; set; } = 15;
@@ -36,6 +41,13 @@ public sealed class EventRecord
     {
         var copy = (EventRecord)MemberwiseClone();
         copy.AnnouncementStyle = (AnnouncementStyle ?? new()).Copy();
+        copy.Sessions = (Sessions ?? []).Select(s => new EventSession { StartLocal = s.StartLocal, EndLocal = s.EndLocal }).ToList();
         return copy;
     }
+}
+
+public sealed class EventSession
+{
+    public string StartLocal { get; set; } = "";
+    public string EndLocal { get; set; } = "";
 }

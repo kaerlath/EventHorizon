@@ -3,7 +3,7 @@
     "Author": "Lynnaes Krasikaz",
     "Name": "Event Horizon",
     "InternalName": "EventHorizon",
-    "AssemblyVersion": "0.16.1.0",
+    "AssemblyVersion": "0.17.0.0",
     "Description": "Plan events with local drafts, templates, previews and history. Connect Discord through the shared Event Horizon relay to publish and synchronize scheduled events and composed announcements. Install the Event Horizon bot in your server before publishing.",
     "ApplicableVersion": "any",
     "DalamudApiLevel": 15,
@@ -14,12 +14,12 @@
     "Punchline": "Plan FFXIV events from inside the game.",
     "AcceptsFeedback": true,
     "IsTestingExclusive": false,
-    "LastUpdate": 1790651033,
+    "LastUpdate": 1790653254,
     "RepoUrl": "https://github.com/kaerlath/EventHorizon",
-    "DownloadLinkUpdate": "https://github.com/kaerlath/EventHorizon/releases/download/v0.16.1/EventHorizon-0.16.1-plugin.zip",
-    "DownloadLinkInstall": "https://github.com/kaerlath/EventHorizon/releases/download/v0.16.1/EventHorizon-0.16.1-plugin.zip",
+    "DownloadLinkUpdate": "https://github.com/kaerlath/EventHorizon/releases/download/v0.17.0/EventHorizon-0.17.0-plugin.zip",
+    "DownloadLinkInstall": "https://github.com/kaerlath/EventHorizon/releases/download/v0.17.0/EventHorizon-0.17.0-plugin.zip",
     "IsHide": false,
-    "DownloadLinkTesting": "https://github.com/kaerlath/EventHorizon/releases/download/v0.16.1/EventHorizon-0.16.1-plugin.zip",
+    "DownloadLinkTesting": "https://github.com/kaerlath/EventHorizon/releases/download/v0.17.0/EventHorizon-0.17.0-plugin.zip",
     "IconUrl": "https://raw.githubusercontent.com/kaerlath/EventHorizon/main/assets/icon.png"
   }
 ]

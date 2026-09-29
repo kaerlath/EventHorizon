@@ -1,3 +1,4 @@
+import {itinerary} from './model.js';
 import {RelayError,token,b64,encode,schedule} from './model.js';
 
 const SCOPE='https://www.googleapis.com/auth/calendar.app.created';
@@ -124,7 +125,7 @@ export class GoogleCalendar {
   }
   eventPayload(saved){
     const item=saved.record,times=schedule(item,0);
-    return {summary:item.title,description:`${encode(item.description)}\n\nOrganizer: ${encode(item.organizer)}\nhttps://discord.com/events/${item.guildId}/${saved.eventId}`,location:[item.world,item.location].filter(Boolean).join(' — '),start:{dateTime:times.start,timeZone:times.zone},end:{dateTime:times.end,timeZone:times.zone}};
+    return {transparency:item.scheduleMode==='Sessions'?'transparent':'opaque',summary:item.title,description:`${encode(item.description)}${item.scheduleMode==='Sessions'?'\n\n'+encode(itinerary(item)):''}\n\nOrganizer: ${encode(item.organizer)}\nhttps://discord.com/events/${item.guildId}/${saved.eventId}`,location:[item.world,item.location].filter(Boolean).join(' — '),start:{dateTime:times.start,timeZone:times.zone},end:{dateTime:times.end,timeZone:times.zone}};
   }
   async processJobs(){
     let processed=0,remaining=false;

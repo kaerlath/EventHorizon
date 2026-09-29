@@ -15,13 +15,15 @@ export class DmReminders {
     if(raw?.personalOnly!==true||raw.discordEventId)throw new RelayError('Discord reminders here are only for personal events.');
     const leads=body.minutes;
     if(!Array.isArray(leads)||leads.length<1||leads.length>2||leads.some(x=>!Number.isInteger(x)||x<0||x>10080))throw new RelayError('Choose one or two reminder times, up to seven days before.');
-    const {item,start}=validate({...raw,guildId:'0',channelId:'',server:'',channel:'',recurrence:'None'},id,Date.now(),true);
+    const {item,start,end,sessions}=validate({...raw,guildId:'0',channelId:'',server:'',channel:'',recurrence:'None'},id,0,true);
+    if(Date.parse(end)<=Date.now())throw new RelayError('This event has already ended.');
     if(!old&&(await this.store.list({prefix:`personal-dm:${login.userId}:`,limit:101})).size>=100)throw new RelayError('You can schedule up to 100 personal events with Discord reminders.');
-    const time=Date.parse(start),deliveries=[...new Set(leads)].sort((a,b)=>b-a).map(minutes=>{
-      const previous=old?.start===start?old.deliveries.find(d=>d.minutes===minutes):null;
-      return previous??{minutes,due:time-minutes*60000,status:time-minutes*60000<Date.now()?'Missed':'Scheduled',nonce:crypto.randomUUID().replaceAll('-','').slice(0,24)};
-    });
-    await this.store.put(k,{userId:login.userId,id,enabled:true,title:item.title,start,deliveries});
+    const deliveries=sessions.flatMap(session=>[...new Set(leads)].sort((a,b)=>b-a).map(minutes=>{
+      const start=session.start,time=Date.parse(start);
+      const previous=old?.deliveries.find(d=>(d.start??old.start)===start&&d.minutes===minutes);
+      return previous??{start,minutes,due:time-minutes*60000,status:time-minutes*60000<Date.now()?'Missed':'Scheduled',nonce:crypto.randomUUID().replaceAll('-','').slice(0,24)};
+    }));
+    await this.store.put(k,{userId:login.userId,id,enabled:true,title:item.title,start,end,deliveries});
     await this.store.setAlarm(Date.now()+60000);
     return {enabled:true,message:'Discord reminders saved for your linked account. They run without the game. Reminder times already passed are skipped.'};
   }
@@ -41,7 +43,7 @@ export class DmReminders {
   async process(now=Date.now()){
     let remaining=false,count=0;
     for(const [k,saved] of await this.store.list({prefix:'personal-dm:'})){
-      if(Date.parse(saved.start)+7*86400000<now){await this.store.delete(k);continue;}
+      if(Date.parse(saved.end??saved.start)+7*86400000<now){await this.store.delete(k);continue;}
       for(const d of saved.deliveries){
         // A crash during a send is ambiguous. Never silently send a duplicate.
         if(d.status==='Sending'){d.status='Delivery uncertain';await this.store.put(k,saved);}
@@ -50,7 +52,7 @@ export class DmReminders {
         if(now-d.due>10*60000){d.status='Missed';await this.store.put(k,saved);continue;}
         count++;d.status='Sending';await this.store.put(k,saved);
         try{
-          await this.send(saved.userId,`Event Horizon personal reminder: ${saved.title}\nStarts <t:${Math.floor(Date.parse(saved.start)/1000)}:F> (<t:${Math.floor(Date.parse(saved.start)/1000)}:R>).`,d.nonce);
+          await this.send(saved.userId,`Event Horizon personal reminder: ${saved.title}\nStarts <t:${Math.floor(Date.parse(d.start??saved.start)/1000)}:F> (<t:${Math.floor(Date.parse(d.start??saved.start)/1000)}:R>).`,d.nonce);
           d.status='Sent';
         }catch{d.status='Delivery failed or unconfirmed — check Discord privacy settings';}
         await this.store.put(k,saved);

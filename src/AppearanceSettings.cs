@@ -2,6 +2,7 @@ namespace EventHorizon;
 
 public sealed class AppearanceSettings
 {
+    public bool ShowOfficialEvents { get; set; } = true;
     public float CalendarFontScale { get; set; } = 1;
     public string CalendarTextColor { get; set; } = "#B9C6E8";
     public Dictionary<string, CalendarTextStyle> CalendarEventStyles { get; set; } = new();

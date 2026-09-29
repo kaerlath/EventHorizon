@@ -1,3 +1,4 @@
+import {discordDescription} from './model.js';
 import {session,heartbeat} from './session.js';
 import {announcementMessage} from './announcement.js';
 import {EventDeletion} from './deletion.js';
@@ -66,7 +67,7 @@ export class RelayCore {
   }
   async route(request) {
     const u = new URL(request.url), path = u.pathname, method = request.method;
-    if (path === '/health' && method === 'GET') return json({service:'Event Horizon', version:'0.15.2', configured:this.configured, composition:'browser-run',googleCalendar:googleConfigured(this.env),fontLibrary:true});
+    if (path === '/health' && method === 'GET') return json({service:'Event Horizon', version:'0.17.0', configured:this.configured, composition:'browser-run',googleCalendar:googleConfigured(this.env),fontLibrary:true});
     if (!this.configured) throw new RelayError('The relay needs its public origin and Discord application credentials.',503);
     if (u.origin !== this.origin) throw new RelayError('Use the configured relay address.',400);
     if(path === '/discord/install' && method === 'GET')return json({url:botInstallUrl(this.env.DISCORD_CLIENT_ID)});
@@ -243,7 +244,7 @@ export class RelayCore {
     if(saved.eventPending)throw new RelayError('An earlier event create has an uncertain result. Operator reconciliation is required; no duplicate was sent.',409);
     const source=banner??await this.loadBanner(id,saved.bannerChunks);
     const card=item.channelId && !saved.messagePending ? await this.render(item,login.name,source,{start,end,zone}) : null;
-    const payload={name:item.title,description:item.description,scheduled_start_time:start,scheduled_end_time:end,privacy_level:2,entity_type:3,channel_id:null,entity_metadata:{location:item.world?`${item.world} — ${item.location}`:item.location}};
+    const payload={name:item.title,description:discordDescription(item),scheduled_start_time:start,scheduled_end_time:end,privacy_level:2,entity_type:3,channel_id:null,entity_metadata:{location:item.world?`${item.world} — ${item.location}`:item.location}};
     if(banner!==undefined && banner!==null)payload.image=banner||null;
     if(!saved.eventId) {
       saved.eventPending=true; await this.store.put(key,saved);

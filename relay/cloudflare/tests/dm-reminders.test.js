@@ -16,6 +16,18 @@ function fixture(){
   const body={enabled:true,minutes:[60,15],recipient_id:'999',event:{id,title:'Personal @everyone',personalOnly:true,startLocal:date.toISOString().slice(0,16).replace('T',' '),timeZoneId:'UTC',durationMinutes:30}};
   return {store,calls,core,dm,id,login,body,start:date.getTime()};
 }
+test('each separate session gets its own reminders and unchanged edits do not resend',async()=>{
+  const f=fixture(),stamp=n=>new Date(n).toISOString().slice(0,16).replace('T',' ');
+  f.body.event.scheduleMode='Sessions';f.body.event.sessions=[
+    {startLocal:stamp(f.start),endLocal:stamp(f.start+3600000)},
+    {startLocal:stamp(f.start+3*86400000),endLocal:stamp(f.start+3*86400000+3600000)}];
+  await f.dm.change(f.login,f.id,f.body);
+  assert.equal((await f.store.get(`personal-dm:42:${f.id}`)).deliveries.length,4);
+  await f.dm.process(f.start-60*60000);assert.equal(f.calls.length,2);
+  await f.dm.change(f.login,f.id,f.body);await f.dm.process(f.start-60*60000);assert.equal(f.calls.length,2);
+  await f.dm.process(f.start+3*86400000-60*60000);assert.equal(f.calls.length,4);
+  assert.ok(f.calls[3].body.content.includes(String(Math.floor((f.start+3*86400000)/1000))));
+});
 test('opt in sends two private DMs from persistent alarms without a player session',async()=>{
   const f=fixture();assert.equal((await f.dm.status('42',f.id)).enabled,false);
   await f.dm.change(f.login,f.id,f.body);

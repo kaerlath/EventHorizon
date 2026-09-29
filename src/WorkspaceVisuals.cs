@@ -137,9 +137,9 @@ public sealed partial class MainWindow
         ImGui.Dummy(new Vector2(size));
     }
 
-    private void DrawDateTimePicker()
+    private string DrawDateTimePicker(string value)
     {
-        if (!DateTime.TryParseExact(editor.StartLocal, "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date)) date = DateTime.Now.AddDays(1);
+        if (!DateTime.TryParseExact(value, "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date)) date = DateTime.Now.AddDays(1);
         ImGui.TextColored(Muted, "Date & time");
         if (ImGui.Button(date.ToString("dddd, MMMM d, yyyy") + "  v", new Vector2(310, 32)))
         { calendarMonth = new DateTime(date.Year, date.Month, 1); ImGui.OpenPopup("Event calendar"); }
@@ -185,7 +185,7 @@ public sealed partial class MainWindow
         ImGui.SameLine(); ImGui.SetNextItemWidth(75);
         if (ImGui.BeginCombo("##ampm", date.Hour >= 12 ? "PM" : "AM"))
         { foreach (var period in new[] { 0, 12 }) if (ImGui.Selectable(period == 0 ? "AM" : "PM", date.Hour / 12 == period / 12)) date = date.Date.AddHours(date.Hour % 12 + period).AddMinutes(date.Minute); ImGui.EndCombo(); }
-        editor.StartLocal = date.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+        return date.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
     }
 
     private void DrawBannerSelector()

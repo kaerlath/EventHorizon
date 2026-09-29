@@ -87,6 +87,7 @@ public static class EventCardTemplate
         </style></head><body><article class="card"><header>{{logo}}<div class="brand">Event Horizon</div></header><main>
         <h1>{{E(item.Title)}}</h1><div class="date">{{E(local.ToString("dddd, MMMM d, yyyy", System.Globalization.CultureInfo.InvariantCulture))}}<br>
         {{E(local.ToString("h:mm tt", System.Globalization.CultureInfo.InvariantCulture))}} – {{E(endLabel)}} · {{E(item.TimeZoneId)}}</div>
+        <div style="white-space:pre-wrap">{{E(EventRules.Itinerary(item))}}</div>
         {{image}}<div class="columns"><div class="panel description">{{E(item.Description)}}</div><aside class="panel">
         <div class="label">Organizer</div><div class="value">{{E(organizer)}}</div><div class="label">Location</div><div class="value">{{E(item.Location)}}<br>{{E(item.World)}}</div>
         <div class="label">Community</div><div class="value">{{E(item.Server)}}</div></aside></div>

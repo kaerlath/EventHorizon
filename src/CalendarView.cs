@@ -12,7 +12,10 @@ public sealed partial class MainWindow
     {
         var zone = TimeZoneInfo.Local;
         // Keep past published events available when browsing earlier months.
-        var events = EventLibrary().Where(e => e.Status is not ("Archived" or "Deleting" or "Deleted") && e.Status != "Draft" &&
+        var showOfficial = store.Appearance.ShowOfficialEvents;
+        if (ImGui.Checkbox("Show official FFXIV events", ref showOfficial)) { store.Appearance.ShowOfficialEvents = showOfficial; TrySaveSettings(); }
+        ImGui.TextDisabled("Official dates verified " + OfficialEvents.VerifiedOn + " · bundled with this version");
+        var events = EventLibrary().Concat(showOfficial ? OfficialEvents.Items : []).Where(e => e.Status is not ("Archived" or "Deleting" or "Deleted") && e.Status != "Draft" &&
             (string.IsNullOrWhiteSpace(search) || (e.Title + " " + e.World + " " + e.Location).Contains(search, StringComparison.OrdinalIgnoreCase))).ToArray();
         if (ImGui.Button("<##previous", new Vector2(34, 30)))
             calendarSelection = calendarFocus = calendarWeekly ? calendarFocus.AddDays(-7) : calendarFocus.AddMonths(-1);
@@ -35,9 +38,13 @@ public sealed partial class MainWindow
         ImGui.PushStyleColor(ImGuiCol.Text, Muted); ImGui.TextWrapped("Local and loaded community events · Times shown in " + zone.DisplayName); ImGui.PopStyleColor();
         var intervals = events.Select(item => (Item: item, Times: EventCalendar.Interval(item, zone)))
             .Where(x => x.Times is not null).OrderBy(x => x.Times!.Value.Start).ToArray();
-        EventRecord[] OnDay(DateTime day) => intervals.Where(x => x.Times!.Value.Start < day.AddDays(1) && x.Times.Value.End > day)
-            .Select(x => x.Item).ToArray();
+        EventRecord[] OnDay(DateTime day) => intervals.Where(x => EventCalendar.OccursOnDay(x.Item, day, zone))
+            .Select(x => x.Item).OrderBy(x => x.InformationOnly).ToArray();
         var rows = calendarWeekly ? 1 : 6;
+        var rangeLanes = intervals.Where(x => x.Item.ScheduleMode != "Single" && x.Times!.Value.End > first && x.Times.Value.Start < first.AddDays(rows * 7))
+            .Select(x => x.Item).Take(6).ToArray();
+        var laneColors = new uint[] { 0xFFDD78C5, 0xFF81D5E5, 0xFFDCB273, 0xFFA3D17C, 0xFF90A5EA, 0xFFEAB888 };
+        if (rangeLanes.Length > 0) ImGui.TextDisabled("Colored range bars continue across active days; select a day for the full list.");
         var height = calendarWeekly ? 200f : 76f;
         if (ImGui.BeginTable("EventCalendar", 7, ImGuiTableFlags.SizingStretchSame))
         {
@@ -57,7 +64,7 @@ public sealed partial class MainWindow
                         var shown = daily.Take(calendarWeekly ? 7 : 1);
                         var needed = 37f + shown.Sum(e => CalendarLines(e.Title, width, CalendarStyle(e).Scale).Length * ImGui.GetFontSize() * CalendarStyle(e).Scale + 5);
                         if (daily.Length > (calendarWeekly ? 7 : 1)) needed += ImGui.GetTextLineHeight() + 4;
-                        height = Math.Max(height, needed);
+                        height = Math.Max(height, needed + rangeLanes.Length * 4);
                     }
                 }
                 var start = ImGui.GetCursorScreenPos(); var size = new Vector2(ImGui.GetContentRegionAvail().X, height);
@@ -72,6 +79,12 @@ public sealed partial class MainWindow
                 if (entries.Length > 0)
                 {
                     draw.AddCircleFilled(start + new Vector2(size.X - 12, 13), 3, Color(Accent));
+                    // Consistent colored lanes show ranges continuing across adjacent days.
+                    for (var lane = 0; lane < rangeLanes.Length; lane++)
+                    {
+                        if (entries.Any(e => e.Id == rangeLanes[lane].Id))
+                            draw.AddRectFilled(start + new Vector2(4, size.Y - 5 - lane * 4), start + new Vector2(size.X - 4, size.Y - 3 - lane * 4), laneColors[lane]);
+                    }
                     var max = calendarWeekly ? 7 : 1;
                     var y = 29f;
                     foreach (var entry in entries.Take(max))
@@ -85,7 +98,7 @@ public sealed partial class MainWindow
                         }
                         y += 5;
                     }
-                    if (entries.Length > max) draw.AddText(start + new Vector2(8, height - 22), 0xFFD5AE9C, $"+{entries.Length - max} more");
+                    if (entries.Length > max) draw.AddText(start + new Vector2(8, height - 22 - rangeLanes.Length * 4), 0xFFD5AE9C, $"+{entries.Length - max} more");
                 }
                 draw.PopClipRect();
                 if (hover && entries.Length > 0)

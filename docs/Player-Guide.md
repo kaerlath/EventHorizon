@@ -144,3 +144,7 @@ Choose **Cancel** or another sidebar page. A separate Event Horizon confirmation
 6. Subscribers whose Google access was disconnected or revoked must reconnect the original Google account and choose **Retry enabled event syncs** in Connection settings. The relay cannot delete independently exported/copied entries or entries in an account it no longer has permission to access.
 
 Deletion cannot be undone; duplicating the retained local record makes a new event. Ordinary **Archive locally** keeps remote copies and does not delete a Discord event. Partial deletion progress is retained and retries do not create new posts.
+
+## Multi-day and official game events
+
+See [Multi-day events](Multi-day-events.md) for continuous ranges, separate sessions, reminders, and the information-only Square Enix catalogue. The in-game Help & Walkthrough has the same topic.

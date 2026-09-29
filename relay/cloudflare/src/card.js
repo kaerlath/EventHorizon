@@ -1,3 +1,4 @@
+import {itinerary} from './model.js';
 import {announcementStyle,styleCss} from './typography.js';
 import {fontCss} from './fonts.js';
 import { encode as E, imageData, b64, MAX_IMAGE, RelayError } from './model.js';
@@ -46,6 +47,7 @@ export function cardHtml(item, organizer, banner, schedule, font, icon, extraFon
   </style></head><body><article class="card">
   <header><img class="logo" src="data:image/png;base64,${icon}" alt=""><div><div class="brand">Event Horizon</div><div class="eyebrow">From Eorzea to Discord</div></div></header>
   <main><h1 style="${styleCss(design.title)}">${E(item.title)}</h1><div class="date">${E(date)}<br><span class="time">${E(period)}</span></div>
+  ${item.scheduleMode==='Sessions'?`<div class="panel" style="white-space:pre-wrap;margin-bottom:24px">${E(itinerary(item))}</div>`:''}
   ${banner?`<img class="hero" src="${E(banner)}" alt="Event banner">`:'<div class="hero empty">Your next gathering awaits</div>'}
   <div class="columns"><section><div class="panel description">${description}</div>
   ${groups?`<h2>Planned signup groups</h2><div class="groups">${groups}</div>`:''}

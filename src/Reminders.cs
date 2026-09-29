@@ -19,11 +19,14 @@ public sealed class EventReminder
     public DateTimeOffset? DismissedStartUtc { get; set; }
     public DateTimeOffset? SnoozedUntilUtc { get; set; }
     public EventReminder Copy() => (EventReminder)MemberwiseClone();
-    public void Refresh(EventRecord item)
+    public void Refresh(EventRecord item, DateTimeOffset? now = null)
     {
-        var start = EventRules.Start(item);
+        var intervals = EventRules.Intervals(item);
+        var next = intervals.FirstOrDefault(t => t.Start > (now ?? DateTimeOffset.UtcNow).AddMinutes(-10));
+        if (next == default) next = intervals[^1];
+        var start = next.Start;
         if (start != StartUtc) { DismissedStartUtc = null; SnoozedUntilUtc = null; }
-        StartUtc = start; EndUtc = start.AddMinutes(item.DurationMinutes);
+        StartUtc = start; EndUtc = next.End;
         Title = item.Title; Location = string.Join(" — ", new[] { item.World, item.Location }.Where(s => !string.IsNullOrWhiteSpace(s)));
     }
 }

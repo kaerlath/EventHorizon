@@ -148,7 +148,7 @@ public sealed partial class MainWindow : Window, IDisposable
         Organizer = relay.UserName
     };
     private void BeginEdit(EventRecord item) { if (IsReadOnly(item)) { message = "Only the publishing account can edit this event."; return; } textStyleTarget = 0; editor = item.Copy(); editing = true; preview = false; message = ""; }
-    private EventRecord? Find(Guid id) => EventLibrary().Concat(store.Templates).FirstOrDefault(x => x.Id == id);
+    private EventRecord? Find(Guid id) => EventLibrary().Concat(store.Templates).Concat(OfficialEvents.Items).FirstOrDefault(x => x.Id == id);
     private EventRecord[] Visible(string name) => (name == "Templates" ? store.Templates : EventLibrary().Where(e => name switch
     {
         "Drafts" => e.Status == "Draft",
@@ -195,6 +195,7 @@ public sealed partial class MainWindow : Window, IDisposable
     {
         ImGui.TextColored(Muted, section + "  >  View event");
         if (ActionButton("Back", FontAwesomeIcon.ArrowLeft, 100)) { selected = null; return; }
+        if (item.InformationOnly) { DrawOfficialDetails(item); return; }
         ImGui.SameLine(); ImGui.BeginDisabled(IsReadOnly(item)); if (ActionButton("Edit event", FontAwesomeIcon.Edit, 155, true)) BeginEdit(item); ImGui.EndDisabled();
         ImGui.SameLine(); if (ActionButton("Duplicate", FontAwesomeIcon.Copy, 155)) CreateCopy(item);
         ImGui.Spacing(); Heading(item.Title);
@@ -273,6 +274,7 @@ public sealed partial class MainWindow : Window, IDisposable
     }
     private void DrawSchedule(EventRecord item)
     {
+        if (item.ScheduleMode != "Single") { DrawSessionSchedule(item); return; }
         if (DateTime.TryParseExact(item.StartLocal, "yyyy-MM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var date))
         {
             using (navIconFont?.Push()) ImGui.TextColored(Accent, char.ConvertFromUtf32((int)FontAwesomeIcon.CalendarAlt));
@@ -340,13 +342,13 @@ public sealed partial class MainWindow : Window, IDisposable
             ImGui.EndDisabled();
             }
             ImGui.Separator(); ImGui.TextColored(Accent, "WHEN & WHERE");
-            DrawDateTimePicker();
+            DrawScheduleEditor();
             if (ImGui.BeginCombo("Time zone", editor.TimeZoneId))
             {
                 foreach (var zone in TimeZoneInfo.GetSystemTimeZones()) if (ImGui.Selectable(zone.DisplayName, editor.TimeZoneId == zone.Id)) editor.TimeZoneId = zone.Id;
                 ImGui.EndCombo();
             }
-            if (ImGui.BeginCombo("Duration", $"{editor.DurationMinutes / 60}h {editor.DurationMinutes % 60:00}m"))
+            if (editor.ScheduleMode == "Single" && ImGui.BeginCombo("Duration", $"{editor.DurationMinutes / 60}h {editor.DurationMinutes % 60:00}m"))
             { foreach (var minutes in new[] { 15, 30, 45, 60, 90, 120, 150, 180, 240, 300, 360, 480, 720, 1440 }) if (ImGui.Selectable($"{minutes / 60}h {minutes % 60:00}m", editor.DurationMinutes == minutes)) editor.DurationMinutes = minutes; ImGui.EndCombo(); }
             Text("World", editor.World, 80, x => editor.World = x); Text("Location", editor.Location, 101, x => editor.Location = x);
             Text("Organizer", editor.Organizer, 100, x => editor.Organizer = x);

@@ -23,12 +23,12 @@ export function imageData(value) {
   return { bytes, mime: match[1] };
 }
 export function localStamp(date, zone, formatter) {
+  if(typeof date==='string')date=new Date(date);
   const parts = (formatter ?? new Intl.DateTimeFormat('en-CA', { timeZone: zone, year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', hourCycle:'h23' })).formatToParts(date);
   const p = Object.fromEntries(parts.map(x => [x.type,x.value]));
   return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}`;
 }
-export function schedule(item, now = Date.now()) {
-  const zone = zones[item.timeZoneId] || item.timeZoneId;
+function instant(item, zone) {
   if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(item.startLocal)) throw new RelayError('Choose a valid date and time.');
   const guess = Date.parse(item.startLocal.replace(' ', 'T') + ':00Z');
   if (!Number.isFinite(guess)) throw new RelayError('Choose a valid date and time.');
@@ -43,12 +43,41 @@ export function schedule(item, now = Date.now()) {
     }
   } catch { throw new RelayError('Choose a supported time zone.'); }
   if (matches.length !== 1) throw new RelayError('That date/time is invalid or occurs twice during daylight saving time. Choose another time.');
-  if (matches[0] <= now) throw new RelayError('Publishing requires a future start time.');
-  return { start: new Date(matches[0]).toISOString(), end: new Date(matches[0] + item.durationMinutes * 60000).toISOString(), zone };
+  return matches[0];
+}
+export function schedule(item, now = Date.now()) {
+  const zone = zones[item.timeZoneId] || item.timeZoneId;
+  const mode=item.scheduleMode??'Single';
+  const parse=value=>instant({startLocal:value},zone);
+  let rows;
+  if(mode==='Single')rows=[[parse(item.startLocal),parse(item.startLocal)+item.durationMinutes*60000]];
+  else if(mode==='Continuous')rows=[[parse(item.startLocal),parse(item.endLocal)]];
+  else if(mode==='Sessions' && Array.isArray(item.sessions) && item.sessions.length>=1 && item.sessions.length<=12)
+    rows=item.sessions.map(s=>[parse(s?.startLocal??s?.StartLocal),parse(s?.endLocal??s?.EndLocal)]).sort((a,b)=>a[0]-b[0]);
+  else throw new RelayError('Choose a schedule with 1–12 sessions.');
+  if(rows.some(([a,b],i)=>!Number.isFinite(b)||b<=a||(i>0&&a<rows[i-1][1])))throw new RelayError('Each end must follow its start and sessions must not overlap.');
+  if(rows.at(-1)[1]-rows[0][0]>366*86400000)throw new RelayError('An event can span at most 366 days.');
+  if(rows[0][0]<=now)throw new RelayError('Publishing requires a future start time.');
+  const sessions=rows.map(([a,b])=>({start:new Date(a).toISOString(),end:new Date(b).toISOString()}));
+  return {start:sessions[0].start,end:sessions.at(-1).end,zone,sessions};
+}
+export function itinerary(item) {
+  if(item.scheduleMode!=='Sessions')return '';
+  const times=schedule(item,0);
+  return `Session schedule (${times.zone}):\n`+times.sessions.map(s=>`${localStamp(s.start,times.zone)} – ${localStamp(s.end,times.zone)}`).join('\n');
+}
+export function discordDescription(item) {
+  const plan=itinerary(item);
+  if(!plan)return item.description;
+  const suffix='\n\n'+plan;
+  const available=1000-suffix.length;
+  const description=item.description.length>available?item.description.slice(0,Math.max(0,available-48))+'… Full description in the announcement.':item.description;
+  return description+suffix;
 }
 export function validate(raw, id, now = Date.now(), preview = false) {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new RelayError('An event is required.');
   const e = Object.fromEntries(Object.entries(raw).map(([k,v]) => [k[0].toLowerCase()+k.slice(1),v]));
+  if(e.informationOnly)throw new RelayError('Official events are information only.');
   const limits = {id:36,title:100,description:1000,location:100,world:100,startLocal:16,timeZoneId:100,organizer:100,signupGroups:600,signupsClose:100,server:100,channel:100,guildId:20,channelId:20,recurrence:30};
   const item = {};
   for (const [key,max] of Object.entries(limits)) {
@@ -64,11 +93,19 @@ export function validate(raw, id, now = Date.now(), preview = false) {
   if (!item.title.trim() || !item.location.trim() || `${item.world} — ${item.location}`.length > 100) throw new RelayError('Enter a title and location within Discord limits.');
   if (!/^\d+$/.test(item.guildId) || (item.channelId && !/^\d+$/.test(item.channelId))) throw new RelayError('Choose a Discord server and channel.');
   if (item.recurrence !== 'None') throw new RelayError('Recurring publication is not available yet.');
-  if (!Number.isInteger(e.durationMinutes) || e.durationMinutes < 1 || e.durationMinutes > 10080) throw new RelayError('Duration must be between 1 minute and 7 days.');
+  item.scheduleMode=e.scheduleMode??'Single';
+  item.endLocal=e.endLocal??'';
+  item.sessions=e.sessions??[];
+  if(item.scheduleMode==='Single' && (!Number.isInteger(e.durationMinutes) || e.durationMinutes < 1 || e.durationMinutes > 527040)) throw new RelayError('Duration must be between 1 minute and 366 days.');
   if(e.googleCalendarSync != null && typeof e.googleCalendarSync !== 'boolean')throw new RelayError('Invalid Google Calendar sync option.');
   item.googleCalendarSync = e.googleCalendarSync ?? false;
   item.durationMinutes = e.durationMinutes;
-  return { item, ...schedule(item,now) };
+  const times=schedule(item,now);
+  item.startLocal=localStamp(times.start,times.zone);
+  item.durationMinutes=(Date.parse(times.end)-Date.parse(times.start))/60000;
+  item.sessions=item.scheduleMode==='Sessions'?times.sessions.map(s=>({startLocal:localStamp(s.start,times.zone),endLocal:localStamp(s.end,times.zone)})):[];
+  item.endLocal=item.scheduleMode==='Continuous'?localStamp(times.end,times.zone):'';
+  return { item, ...times };
 }
 export function permissions(guild, user, member, roles, channel) {
   const ids = new Set(member.roles);

@@ -1,3 +1,4 @@
+import {itinerary} from './model.js';
 import {RelayError,validate,schedule} from './model.js';
 
 // Private records never enter the event: namespace used by community APIs.
@@ -46,7 +47,7 @@ export class PersonalEvents {
       saved.status='removed';saved.record=null;
     }else{
       const r=saved.record,t=schedule(r,0);
-      const payload={summary:r.title,description:r.description,location:[r.world,r.location].filter(Boolean).join(' — '),visibility:'private',start:{dateTime:t.start,timeZone:t.zone},end:{dateTime:t.end,timeZone:t.zone}};
+      const payload={summary:r.title,description:r.description+(r.scheduleMode==='Sessions'?'\n\n'+itinerary(r):''),transparency:r.scheduleMode==='Sessions'?'transparent':'opaque',location:[r.world,r.location].filter(Boolean).join(' — '),visibility:'private',start:{dateTime:t.start,timeZone:t.zone},end:{dateTime:t.end,timeZone:t.zone}};
       try{await google.api(job.userId,c,'POST',path,{id:saved.eventId,...payload});}
       catch(e){if(e.googleStatus===409)await google.api(job.userId,c,'PATCH',path+'/'+saved.eventId,payload);else throw e;}
       saved.status='Synced';
