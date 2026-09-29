@@ -67,7 +67,7 @@ export class RelayCore {
   }
   async route(request) {
     const u = new URL(request.url), path = u.pathname, method = request.method;
-    if (path === '/health' && method === 'GET') return json({service:'Event Horizon', version:'0.17.0', configured:this.configured, composition:'browser-run',googleCalendar:googleConfigured(this.env),fontLibrary:true});
+    if (path === '/health' && method === 'GET') return json({service:'Event Horizon', version:'0.17.1', configured:this.configured, composition:'browser-run',googleCalendar:googleConfigured(this.env),fontLibrary:true});
     if (!this.configured) throw new RelayError('The relay needs its public origin and Discord application credentials.',503);
     if (u.origin !== this.origin) throw new RelayError('Use the configured relay address.',400);
     if(path === '/discord/install' && method === 'GET')return json({url:botInstallUrl(this.env.DISCORD_CLIENT_ID)});

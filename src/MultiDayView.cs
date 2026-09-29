@@ -51,6 +51,8 @@ public sealed partial class MainWindow
     {
         ImGui.Spacing(); Heading(item.Title);
         ImGui.TextColored(Accent, "OFFICIAL FFXIV EVENT · INFORMATION ONLY");
+        var badge = EventTypes.For(item);
+        ImGui.TextColored(badge.Color, badge.Code + " · " + badge.Name);
         DrawSessionSchedule(item);
         ImGui.Spacing(); ImGui.TextWrapped(item.Description);
         ImGui.TextWrapped("Times shown in your local time zone. Dates verified " + OfficialEvents.VerifiedOn + ". Future events appear when confirmed dates are added in an update.");

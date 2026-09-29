@@ -58,7 +58,7 @@ public sealed partial class MainWindow
         {
             // Only the fields needed by Google leave this installation.
             var payload = new { copy.Id, copy.Title, copy.Description, copy.StartLocal, copy.TimeZoneId,
-                copy.DurationMinutes, copy.ScheduleMode, copy.EndLocal, copy.Sessions, copy.Location, copy.World, PersonalOnly = true };
+                copy.DurationMinutes, copy.ScheduleMode, copy.EndLocal, copy.Sessions, copy.EventType, copy.Tags, copy.Location, copy.World, PersonalOnly = true };
             if (copy.DiscordRemindersEnabled && !remove)
                 await relay.Send<DmStatus>(HttpMethod.Put, $"events/{copy.Id}/personal-reminders", DmPayload(copy, true));
             var result = await relay.Send<SubscriptionResult>(remove ? HttpMethod.Delete : HttpMethod.Put,

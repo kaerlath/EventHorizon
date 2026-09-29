@@ -65,8 +65,7 @@ public sealed partial class MainWindow
         ImGui.Spacing(); Heading("Calendar fonts");
         var calendarScale = CalendarScale(settings.CalendarFontScale);
         if (ImGui.SliderFloat("Calendar event text size", ref calendarScale, .7f, 1.5f, "%.2fx")) { settings.CalendarFontScale = calendarScale; changed = true; }
-        changed |= EditColor("Calendar event text color", settings.CalendarTextColor, x => settings.CalendarTextColor = x);
-        ImGui.TextWrapped("Titles wrap to the day width. Open an event's View to customize just that event. These choices affect only your calendar.");
+        ImGui.TextWrapped("Calendar text size controls the event capsules. Category colors stay consistent; titles and full details appear below the calendar. Announcement typography is separate.");
         if (ImGui.Button("Restore defaults")) { store.Appearance = new(); changed = true; }
         if (changed) TrySaveSettings();
         ImGui.Spacing(); Heading("Live preview");

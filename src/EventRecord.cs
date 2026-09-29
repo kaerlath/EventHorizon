@@ -6,6 +6,8 @@ public sealed class EventRecord
     public string EndLocal { get; set; } = "";
     public List<EventSession> Sessions { get; set; } = [];
     public bool InformationOnly { get; set; }
+    public string EventType { get; set; } = "";
+    public string Tags { get; set; } = "";
     public string SourceUrl { get; set; } = "";
     public bool DiscordRemindersEnabled { get; set; }
     public int DiscordAdvanceMinutes { get; set; } = 60;

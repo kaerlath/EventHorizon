@@ -2,7 +2,7 @@
 
 A Final Fantasy XIV Dalamud plugin for planning community events and sharing them with Discord.
 
-Event Horizon combines an in-game calendar, local drafts, styled announcement images, personal reminders, and optional Google Calendar subscriptions. **Current plugin version: 0.17.0.** This is a friends-and-guild beta, not an official Dalamud plugin repository release.
+Event Horizon combines an in-game calendar, local drafts, styled announcement images, personal reminders, and optional Google Calendar subscriptions. **Current plugin version: 0.17.1.** This is a friends-and-guild beta, not an official Dalamud plugin repository release.
 
 ## Start here
 
@@ -25,7 +25,7 @@ Event Horizon combines an in-game calendar, local drafts, styled announcement im
 
 ## Test the plugin
 
-Once the v0.17.0 release package is published, install through Dalamud:
+Once the v0.17.1 release package is published, install through Dalamud:
 
 1. Open Dalamud Settings with `/xlsettings`, then the **Experimental** tab.
 2. Add this URL under **Custom Plugin Repositories**, enable it, and save:

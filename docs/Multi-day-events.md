@@ -6,7 +6,7 @@ In **Create Event → Schedule**, choose:
 - **Continuous multi-day**: explicit start and end dates/times. Every overlapping calendar day shows the event.
 - **Multiple sessions**: up to 12 separate start/end pairs within 366 days. Times can differ each day. Gaps stay empty on the in-game calendar. Sessions cannot overlap; ambiguous or skipped daylight-saving times must be changed.
 
-Calendar range bars use consistent colored lanes across the visible weeks, for up to six ranges. Select any active day to see the complete event list below it. Player events are listed before official entries. The event's View lists every session in your local time zone.
+Calendar capsules use consistent lanes across each week. Month view shows up to four lanes and week view up to seven; +more indicates additional events in the full list. Select any active day to see the complete event list below it. Player events are listed before official entries. The event's View lists every session in your local time zone.
 
 Your personal on-screen reminder follows each session. Dismissing one occurrence does not dismiss the next. Opted-in personal Discord DMs also follow each session, even out of game; missed reminder times are skipped.
 
@@ -31,3 +31,5 @@ The catalogue is bundled with plugin updates, not scraped automatically. Verifie
 | A Nocturne for Heroes | Sep 24, 2026, 1:00 AM | Oct 13, 2026, 7:59 AM | [Square Enix announcement](https://na.finalfantasyxiv.com/lodestone/topics/detail/b7ff81b627294a36825255532371d6d8f9066d74) |
 
 No confirmed later seasonal dates or 2027 dates were found during this check. They are omitted rather than estimated. Square Enix can change event times; use the source link for the latest details. These entries apply to the global game service described on the linked Lodestone pages.
+
+See [Calendar event types](Calendar-event-types.md) for the capsule legend, hover, selection and tags.

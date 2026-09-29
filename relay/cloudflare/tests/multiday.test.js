@@ -5,6 +5,13 @@ import {announcementText} from '../src/announcement.js';
 import {cardHtml} from '../src/card.js';
 import {RelayCore} from '../src/core.js';
 const make=()=>({id:crypto.randomUUID(),title:'Festival',description:'Full description',location:'Garden',guildId:'123',startLocal:'2035-06-12 18:00',timeZoneId:'UTC',durationMinutes:120,scheduleMode:'Sessions',sessions:[{StartLocal:'2035-06-14 19:00',EndLocal:'2035-06-14 21:00'},{StartLocal:'2035-06-12 18:00',EndLocal:'2035-06-12 20:00'}]});
+test('category and tags survive relay validation without granting private or official access',()=>{
+  const e=make();e.EventType='DM';e.Tags='RP, Investigation';
+  const r=validate(e,e.id).item;assert.equal(r.eventType,'DM');assert.equal(r.tags,e.Tags);assert.equal(r.informationOnly,undefined);
+  e.EventType='PE';assert.equal(validate(e,e.id).item.eventType,'CE');
+  e.personalOnly=true;assert.equal(validate(e,e.id).item.eventType,'PE');
+  e.Tags='x'.repeat(251);assert.throws(()=>validate(e,e.id),/tags/);
+});
 test('sessions roundtrip PascalCase client fields, sorted dates, and full itinerary',()=>{
   const e=make(),t=validate(e,e.id),r=t.item;
   assert.equal(t.start,'2035-06-12T18:00:00.000Z');assert.equal(t.end,'2035-06-14T21:00:00.000Z');

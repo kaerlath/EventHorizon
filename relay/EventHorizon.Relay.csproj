@@ -7,4 +7,5 @@
     <Content Include="../assets/icon.png" Link="card-assets/icon.png" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup><Compile Include="../src/AnnouncementStyle.cs" Link="AnnouncementStyle.cs" /></ItemGroup>
+  <ItemGroup><Compile Include="../src/EventTypes.cs" Link="EventTypes.cs" /></ItemGroup>
 </Project>

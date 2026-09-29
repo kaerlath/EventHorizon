@@ -148,3 +148,5 @@ Deletion cannot be undone; duplicating the retained local record makes a new eve
 ## Multi-day and official game events
 
 See [Multi-day events](Multi-day-events.md) for continuous ranges, separate sessions, reminders, and the information-only Square Enix catalogue. The in-game Help & Walkthrough has the same topic.
+
+The calendar now uses [event type capsules](Calendar-event-types.md). Hover the information icon for type, title and local time; select the capsule body for full details below. Choose a type and optional comma-separated tags in the event editor. Categories never change event visibility or editing access.

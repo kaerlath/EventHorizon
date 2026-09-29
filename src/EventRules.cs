@@ -46,6 +46,9 @@ public static class EventRules
     public static string? Validate(EventRecord item, bool publish = false)
     {
         if (item.InformationOnly) return "Official events are information only.";
+        if (item.Tags.Length > 250) return "Keep tags within 250 characters.";
+        if (item.EventType.Length > 0 && !EventTypes.All.Any(c => c.Code == item.EventType)) return "Choose a valid event type.";
+        item.EventType = EventTypes.For(item).Code;
         if (string.IsNullOrWhiteSpace(item.Title) || item.Title.Length > 100) return "Enter a title of 1–100 characters.";
         if (item.Description.Length > 1000) return "Discord descriptions can contain up to 1,000 characters.";
         if (item.Organizer.Length > 100 || item.Server.Length > 100 || item.SignupGroups.Length > 600)

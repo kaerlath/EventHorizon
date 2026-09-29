@@ -165,6 +165,17 @@ public sealed partial class MainWindow : Window, IDisposable
         ImGui.SetNextItemWidth(-1); ImGui.InputTextWithHint("##search", "Search title, world or location", ref search, 200);
         ImGui.Separator();
         var list = section == "Events" ? DrawEventCalendar() : Visible(section);
+        if (section == "Events" && calendarDetailId is Guid detailId)
+        {
+            var detail = list.FirstOrDefault(e => e.Id == detailId);
+            if (detail is null) calendarDetailId = null;
+            else
+            {
+                ImGui.BeginChild("SelectedCalendarEvent", new Vector2(-1, 650), true);
+                DrawDetails(detail, true);
+                ImGui.EndChild(); ImGui.Spacing();
+            }
+        }
         if (list.Length == 0 && section != "Events")
         {
             ImGui.Spacing(); DrawOrb(165); Heading("A new gathering awaits");
@@ -180,7 +191,7 @@ public sealed partial class MainWindow : Window, IDisposable
             var localTime = EventCalendar.Interval(item, TimeZoneInfo.Local);
             ImGui.TextColored(Muted, localTime is { } t ? $"{t.Start:ddd, MMM d · h:mm tt} – {t.End:MMM d · h:mm tt}" : item.StartLocal);
             ImGui.TextUnformatted($"{item.World}  {item.Location}  /  {item.Status}");
-            if (ImGui.SmallButton("View")) selected = item.Id;
+            if (ImGui.SmallButton("View")) { if (section == "Events") calendarDetailId = item.Id; else selected = item.Id; }
             ImGui.SameLine(); ImGui.BeginDisabled(IsReadOnly(item)); if (ImGui.SmallButton(section == "Templates" ? "Use template" : "Edit"))
             { if (section == "Templates") CreateCopy(item); else BeginEdit(item); }
             ImGui.EndDisabled(); ImGui.EndChild(); ImGui.PopID();
@@ -191,17 +202,18 @@ public sealed partial class MainWindow : Window, IDisposable
         var copy = item.Copy(); copy.Id = Guid.NewGuid(); copy.Status = "Draft"; copy.ReadOnly = false; copy.GoogleCalendarSync = false; copy.DiscordRemindersEnabled = false;
         copy.DiscordEventId = ""; copy.DiscordMessageId = ""; copy.RelayOrigin = ""; BeginEdit(copy);
     }
-    private void DrawDetails(EventRecord item)
+    private void DrawDetails(EventRecord item, bool inline = false)
     {
         ImGui.TextColored(Muted, section + "  >  View event");
-        if (ActionButton("Back", FontAwesomeIcon.ArrowLeft, 100)) { selected = null; return; }
+        if (ActionButton("Back", FontAwesomeIcon.ArrowLeft, 100)) { if (inline) calendarDetailId = null; else selected = null; return; }
         if (item.InformationOnly) { DrawOfficialDetails(item); return; }
         ImGui.SameLine(); ImGui.BeginDisabled(IsReadOnly(item)); if (ActionButton("Edit event", FontAwesomeIcon.Edit, 155, true)) BeginEdit(item); ImGui.EndDisabled();
         ImGui.SameLine(); if (ActionButton("Duplicate", FontAwesomeIcon.Copy, 155)) CreateCopy(item);
         ImGui.Spacing(); Heading(item.Title);
         if (item.Status is "Deleting" or "Deleted") { ImGui.TextWrapped("This event has been withdrawn. Check status below for remaining Discord or Google cleanup."); DrawDeletionControls(item); return; }
         DrawSchedule(item);
-        DrawCalendarTextStyle(item);
+        ImGui.TextColored(EventTypes.For(item).Color, EventTypes.For(item).Name);
+        if (!string.IsNullOrWhiteSpace(item.Tags)) ImGui.TextWrapped("Tags: " + item.Tags);
         if (item.DiscordEventId.Length > 0)
         {
             ImGui.Checkbox("Show announcement artwork", ref showAnnouncement);
@@ -342,6 +354,7 @@ public sealed partial class MainWindow : Window, IDisposable
             ImGui.EndDisabled();
             }
             ImGui.Separator(); ImGui.TextColored(Accent, "WHEN & WHERE");
+            DrawEventCategoryEditor();
             DrawScheduleEditor();
             if (ImGui.BeginCombo("Time zone", editor.TimeZoneId))
             {

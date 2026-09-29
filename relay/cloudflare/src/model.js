@@ -80,6 +80,11 @@ export function validate(raw, id, now = Date.now(), preview = false) {
   if(e.informationOnly)throw new RelayError('Official events are information only.');
   const limits = {id:36,title:100,description:1000,location:100,world:100,startLocal:16,timeZoneId:100,organizer:100,signupGroups:600,signupsClose:100,server:100,channel:100,guildId:20,channelId:20,recurrence:30};
   const item = {};
+  const types=['SE-OE','SE-RE','SE-SE','GE','CE','SO','DM','FC','PE'];
+  if(e.eventType && !types.includes(e.eventType))throw new RelayError('Choose a valid event type.');
+  if(e.tags != null && (typeof e.tags!=='string'||e.tags.length>250))throw new RelayError('Keep tags within 250 characters.');
+  item.eventType=e.personalOnly===true?'PE':e.eventType==='PE'?'CE':e.eventType||'CE';
+  item.tags=e.tags??'';
   for (const [key,max] of Object.entries(limits)) {
     const value = e[key] ?? (key === 'recurrence' ? 'None' : '');
     if (typeof value !== 'string' || value.length > max) throw new RelayError(`Invalid ${key}.`);

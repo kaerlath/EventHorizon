@@ -7,4 +7,5 @@
   <ItemGroup><Compile Include="../src/Reminders.cs" Link="Reminders.cs" /></ItemGroup>
   <ItemGroup><Compile Include="../src/CalendarText.cs" Link="CalendarText.cs" /></ItemGroup>
   <ItemGroup><Compile Include="../src/OfficialEvents.cs" Link="OfficialEvents.cs" /></ItemGroup>
+  <ItemGroup><Compile Include="../src/CalendarLanes.cs" Link="CalendarLanes.cs" /></ItemGroup>
 </Project>
