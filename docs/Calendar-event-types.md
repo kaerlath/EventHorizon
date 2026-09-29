@@ -1,5 +1,13 @@
 # Calendar event types
 
+## Choose which types to display
+
+In Events, expand **Event type legend & filters**. Check individual types to show them, or uncheck them to hide them. **All on** enables all nine types; **All off** disables them together. The heading shows the number enabled even when collapsed. Choices save locally and survive plugin restarts.
+
+These filters apply to month/week calendars and the event list beneath them. Selected details close if that event is filtered out. Search and **Show official FFXIV events** still apply independently, including after All on. Hidden events are not deleted: reminders and Discord/Google copies are unchanged, and Drafts/History are not filtered. Appearance's Restore defaults re-enables all types.
+
+## Capsule legend
+
 All events use compact colored capsules. Color identifies the category, not whether the publisher is Square Enix or a player.
 
 | Code | Meaning | Color |

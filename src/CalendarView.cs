@@ -13,13 +13,31 @@ public sealed partial class MainWindow
         var zone = TimeZoneInfo.Local;
         var showOfficial = store.Appearance.ShowOfficialEvents;
         if (ImGui.Checkbox("Show official FFXIV events", ref showOfficial)) { store.Appearance.ShowOfficialEvents = showOfficial; TrySaveSettings(); }
-        if (ImGui.CollapsingHeader("Event type legend"))
+        var hiddenTypes = store.Appearance.HiddenEventTypes ??= [];
+        var enabledTypes = EventTypes.All.Count(t => !hiddenTypes.Contains(t.Code));
+        if (ImGui.CollapsingHeader($"Event type legend & filters ({enabledTypes}/{EventTypes.All.Length} on)###EventTypeFilters"))
         {
-            foreach (var type in EventTypes.All) ImGui.TextColored(type.Color, type.Code + " · " + type.Name);
+            var changed = false;
+            if (ImGui.Button("All on")) { hiddenTypes.Clear(); changed = true; }
+            ImGui.SameLine();
+            if (ImGui.Button("All off")) { hiddenTypes.UnionWith(EventTypes.All.Select(t => t.Code)); changed = true; }
+            foreach (var type in EventTypes.All)
+            {
+                var enabled = !hiddenTypes.Contains(type.Code);
+                ImGui.PushStyleColor(ImGuiCol.Text, type.Color);
+                if (ImGui.Checkbox(type.Code + " · " + type.Name, ref enabled))
+                {
+                    if (enabled) hiddenTypes.Remove(type.Code); else hiddenTypes.Add(type.Code);
+                    changed = true;
+                }
+                ImGui.PopStyleColor();
+            }
+            if (changed) TrySaveSettings();
+            ImGui.TextWrapped("These filters save on this computer and affect only your calendar and its event list. Reminders and Discord/Google copies are unchanged. All on enables every type; Show official FFXIV events and search still apply.");
             ImGui.TextWrapped("Color identifies the category, not the publisher. Official Square Enix entries are read-only. Hover only the i for type, title and local time. Click the capsule body for full details below.");
         }
         ImGui.TextDisabled("Official dates verified " + OfficialEvents.VerifiedOn);
-        var events = EventLibrary().Concat(showOfficial ? OfficialEvents.Items : []).Where(e => e.Status is not ("Archived" or "Deleting" or "Deleted" or "Draft") &&
+        var events = EventLibrary().Concat(showOfficial ? OfficialEvents.Items : []).Where(e => store.Appearance.IsEventTypeVisible(e) && e.Status is not ("Archived" or "Deleting" or "Deleted" or "Draft") &&
             (string.IsNullOrWhiteSpace(search) || (e.Title + " " + e.World + " " + e.Location + " " + e.Tags + " " + EventTypes.For(e).Name).Contains(search, StringComparison.OrdinalIgnoreCase))).ToArray();
         if (ImGui.Button("<##previous", new Vector2(34,30))) { calendarSelection = calendarFocus = calendarWeekly ? calendarFocus.AddDays(-7) : calendarFocus.AddMonths(-1); calendarDetailId = null; }
         ImGui.SameLine();
@@ -91,6 +109,7 @@ public sealed partial class MainWindow
         ImGui.Spacing(); Heading(calendarSelection.ToString("dddd, MMMM d, yyyy"));
         var result = OnDay(calendarSelection);
         ImGui.TextColored(Muted,result.Length == 1 ? "1 event" : $"{result.Length} events");
+        if (result.Length == 0) ImGui.TextWrapped("No events match this day and your current filters. Check Event type legend & filters, search, or Show official FFXIV events.");
         if (ImGui.Button("+ Create event on this day",new Vector2(240,34))) { var item=NewRecord(); item.StartLocal=calendarSelection.AddHours(19).ToString("yyyy-MM-dd HH:mm"); BeginEdit(item); }
         ImGui.Spacing(); return result;
     }
